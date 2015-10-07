@@ -1,0 +1,10 @@
+{
+  "applications": {
+    "_default": {
+      "link": "hear-dev"
+    },
+    "hear-dev": {
+      "applicationId": "YoKGeRRzGizxpkXM6V11kfaV6iX3KXt7QSJeNeXR"
+    }
+  }
+}
