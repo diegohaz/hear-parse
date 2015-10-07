@@ -10,6 +10,8 @@ export default class User extends Parse.Object {
 		user.get('picture') 		|| user.set('picture', '');
 		user.get('services') 		|| user.set('services', {});
 		user.get('identified')	|| user.set('anonymous', false);
+		user.get('genres')			|| user.set('genres', []);
+		user.get('artists')			|| user.set('artists', []);
 		user.set('deleted', false);
 
 		response.success();
