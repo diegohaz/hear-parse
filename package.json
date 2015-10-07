@@ -1,0 +1,27 @@
+{
+  "name": "hear-parse",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/main.js",
+  "scripts": {
+    "postinstall": "npm run setup && npm run build",
+    "setup": "mkdir -p cloud",
+    "clean": "rm -rf cloud",
+    "build": "browserify src/main.js -t babelify -o cloud/main.js",
+    "deploy": "npm run build && parse deploy"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/diegohaz/hear-parse"
+  },
+  "author": "Diego Haz",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/diegohaz/hear-parse/issues"
+  },
+  "homepage": "https://github.com/diegohaz/hear-parse",
+  "devDependencies": {
+    "babelify": "^6.3.0",
+    "browserify": "^11.0.1"
+  }
+}
