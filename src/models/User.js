@@ -3,16 +3,20 @@ export default class User extends Parse.Object {
 		super('_User');
 	}
 
+	schematize() {
+		this.get('name') 				|| this.set('name', '');
+		this.get('picture') 		|| this.set('picture', '');
+		this.get('services') 		|| this.set('services', {});
+		this.get('identified')	|| this.set('identified', false);
+		this.get('genres')			|| this.set('genres', []);
+		this.get('artists')			|| this.set('artists', []);
+		this.set('deleted', false);
+	}
+
 	static beforeSave(request, response) {
 		let user = request.object;
 
-		user.get('name') 				|| user.set('name', '');
-		user.get('picture') 		|| user.set('picture', '');
-		user.get('services') 		|| user.set('services', {});
-		user.get('identified')	|| user.set('anonymous', false);
-		user.get('genres')			|| user.set('genres', []);
-		user.get('artists')			|| user.set('artists', []);
-		user.set('deleted', false);
+		user.schematize();
 
 		response.success();
 	}
