@@ -9,6 +9,8 @@ export default class User extends Parse.Object {
 		this.get('picture') 		|| this.set('picture', '');
 		this.get('services') 		|| this.set('services', {});
 		this.get('identified')	|| this.set('identified', false);
+		this.get('genres')			|| this.set('genres', []);
+		this.get('artists')			|| this.set('artists', []);
 	}
 
 	// beforeSave

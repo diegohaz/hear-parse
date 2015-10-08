@@ -11,9 +11,8 @@ export default class Song extends Parse.Object {
     this.get('iTunesId')  || this.set('iTunesId', 0);
     this.get('title')     || this.set('title', '');
     this.get('artist')    || this.set('artist', Artist.createWithoutData('null'));
-    this.get('genres')    || this.set('genres', []);
+    this.get('genre')     || this.set('genre', Genre.createWithoutData('null'));
     this.get('cover')     || this.set('cover', '');
-    this.get('duration')  || this.set('duration', 0);
     this.get('preview')   || this.set('preview', '');
     this.get('services')  || this.set('services', {});
 
@@ -51,9 +50,8 @@ export default class Song extends Parse.Object {
       song.set('title', result.trackName);
       song.set('artist', artist);
       song.set('cover', result.artworkUrl100);
-      song.set('duration', result.trackTimeMillis);
       song.set('preview', result.previewUrl);
-      song.add('genres', genre);
+      song.set('genre', genre);
 
       return Parse.Promise.as();
     });
@@ -103,30 +101,27 @@ export default class Song extends Parse.Object {
       params: {term: string, media: 'music', limit: limit}
     }).then(function(response) {
       if (response.status == 200) {
-        // CONSERTAR ISSO
         let results = JSON.parse(response.text).results;
-        let callback = (i, trackId) => {
-          return Song.create(trackId).then(function() {
-            if (results.length > i) {
-              return callback(++i, results[i].trackId);
-            }
-          });
-        };
+        let songs = [];
 
-        if (results.length) {
-          return callback(0, results[0].trackId);
-        } else {
-          return Parse.Promise.as([]);
+        for (let i = 0; i < results.length; i++) {
+          let result = results[i];
+          let song = {};
+
+          song.id = result.trackId;
+          song.title = result.trackName;
+          song.artist = result.artistName;
+          song.cover = result.artworkUrl100;
+          song.preview = result.previewUrl;
+
+          songs.push(song);
         }
+
+        return Parse.Promise.as(songs);
       } else {
         return Parse.Promise.error('Could not connect to iTunes');
       }
     });
-  }
-
-  // list
-  static list(location, limit = 30, page = 0) {
-
   }
 }
 
