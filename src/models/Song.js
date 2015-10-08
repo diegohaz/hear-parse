@@ -19,6 +19,19 @@ export default class Song extends Parse.Object {
     this.setACL(new Parse.ACL({'*': {'read': true}}));
   }
 
+  // view
+  view() {
+    let view = {};
+
+    view.id      = this.get('iTunesId');
+    view.title   = this.get('title');
+    view.artist  = this.get('artist').get('name');
+    view.cover   = this.get('cover');
+    view.preview = this.get('preview');
+
+    return view;
+  }
+
   // setup
   setup(iTunesId) {
     let result, artist, song = this;
@@ -80,6 +93,7 @@ export default class Song extends Parse.Object {
 
     let songs = new Parse.Query(Song);
 
+    songs.include(['artist', 'genre']);
     songs.equalTo('iTunesId', iTunesId);
 
     return songs.first().then(function(song) {

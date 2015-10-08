@@ -35,7 +35,11 @@ export default class SongPost extends Parse.Object {
       songPost.set('song', song);
       songPost.set('location', location);
 
-      return songPost.save();
+      return songPost.save().then(function(songPost) {
+        let view = song.view();
+
+        return Parse.Promise.as(view);
+      });
     });
   }
 
@@ -51,31 +55,26 @@ export default class SongPost extends Parse.Object {
 
     return songPosts.find().then(function(songPosts) {
       let songsIds = [];
-      let songsToReturn = [];
+      let views = [];
       let results = {};
 
-      for (let i = 0; i < songPosts.length && songsToReturn.length < 30; i++) {
+      for (let i = 0; i < songPosts.length && views.length < 30; i++) {
         let songPost = songPosts[i];
         let song = songPost.get('song');
         skip++;
 
         if (!~songsIds.indexOf(song.id)) {
-          let songToReturn = {};
+          let view = song.view();
 
-          songToReturn.id       = song.get('iTunesId');
-          songToReturn.title    = song.get('title');
-          songToReturn.artist   = song.get('artist').get('name');
-          songToReturn.cover    = song.get('cover');
-          songToReturn.preview  = song.get('preview');
-          songToReturn.distance = songPost.get('location').kilometersTo(location)*1000;
+          view.distance = songPost.get('location').kilometersTo(location)*1000;
 
           songsIds.push(song.id);
-          songsToReturn.push(songToReturn);
+          views.push(view);
         }
       }
 
       results.nextPage = skip;
-      results.songs = songsToReturn;
+      results.songs = views;
 
       return Parse.Promise.as(results);
     });

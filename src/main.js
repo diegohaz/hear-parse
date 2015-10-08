@@ -19,17 +19,19 @@ Parse.Cloud.define('searchSong', function(request, response) {
 
 Parse.Cloud.define('postSong', function(request, response) {
   let id = request.params.id;
-  let lat = request.params.lat;
-  let lng = request.params.lng;
+  let lat = +request.params.lat;
+  let lng = +request.params.lng;
+  let location = new Parse.GeoPoint(lat, lng);
 
-  SongPost.post(id, new Parse.GeoPoint(lat, lng)).then(response.success, response.error);
+  SongPost.post(id, location).then(response.success, response.error);
 });
 
 Parse.Cloud.define('listSongs', function(request, response) {
-  let lat = request.params.lat;
-  let lng = request.params.lng;
+  let lat = +request.params.lat;
+  let lng = +request.params.lng;
   let limit = request.params.limit || 30;
   let skip = request.params.skip || 0;
+  let location = new Parse.GeoPoint({latitude: lat, longitude: lng});
 
-  SongPost.list(new Parse.GeoPoint(lat, lng), limit, skip).then(response.success, response.error);
+  SongPost.list(location, limit, skip).then(response.success, response.error);
 });
