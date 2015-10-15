@@ -58,7 +58,7 @@ export default class SongPost extends Parse.Object {
       let views = [];
       let results = {};
 
-      for (let i = 0; i < songPosts.length && views.length < 30; i++) {
+      for (let i = 0; i < songPosts.length && views.length < limit; i++) {
         let songPost = songPosts[i];
         let song = songPost.get('song');
         skip++;
