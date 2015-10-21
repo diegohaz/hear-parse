@@ -27,7 +27,7 @@ export default class Service {
         break;
     }
 
-    console.log(`Matching with term ${term}`);
+    console.log(`Matching to service ${this.name} with term ${term}`);
 
     return this.search(term, 1).then(function(result) {
       return Parse.Promise.as(result[0]);
@@ -50,6 +50,7 @@ export default class Service {
       case 'deezer':
         request.url = 'http://api.deezer.com/track/' + id;
         request.params = {};
+        break;
     }
 
     return Parse.Cloud.httpRequest(request).then(function(response) {

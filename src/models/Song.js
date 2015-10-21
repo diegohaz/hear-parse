@@ -84,22 +84,24 @@ export default class Song extends Parse.Object {
       }
     }
 
-    Parse.Promise.when(promises).then(function() {
-      for (var i = 0; i < arguments.length; i++) {
-        let match = arguments[i];
-        console.log(`Setting match ${match.title}`);
+    if (promises.length) {
+      Parse.Promise.when(promises).then(function() {
+        for (var i = 0; i < arguments.length; i++) {
+          let match = arguments[i];
+          console.log(`Setting match ${match.title}`);
 
-        if (match) {
-          song.set(match.service, {
-            id: '' + match.id,
-            cover: match.cover,
-            preview: match.preview
-          });
+          if (match) {
+            song.set(match.service, {
+              id: '' + match.id,
+              cover: match.cover,
+              preview: match.preview
+            });
+          }
         }
-      }
 
-      song.save();
-    });
+        song.save();
+      });
+    }
   }
 
   // create
