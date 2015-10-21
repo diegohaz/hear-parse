@@ -1,6 +1,8 @@
-import Artist from './Artist';
 import Genre from './Genre';
+import User from './User';
+import Service from './Service';
 
+// HERE
 export default class Song extends Parse.Object {
   constructor() {
     super('Song');
@@ -8,13 +10,8 @@ export default class Song extends Parse.Object {
 
   // schematize
   schematize() {
-    this.get('iTunesId')  || this.set('iTunesId', 0);
-    this.get('title')     || this.set('title', '');
-    this.get('artist')    || this.set('artist', Artist.createWithoutData('null'));
-    this.get('genre')     || this.set('genre', Genre.createWithoutData('null'));
-    this.get('cover')     || this.set('cover', '');
-    this.get('preview')   || this.set('preview', '');
-    this.get('services')  || this.set('services', {});
+    this.get('title')  || this.set('title', '');
+    this.get('artist') || this.set('artist', '');
 
     this.setACL(new Parse.ACL({'*': {'read': true}}));
   }
@@ -22,49 +19,40 @@ export default class Song extends Parse.Object {
   // view
   view() {
     let view = {};
+    let service = User.currentService.name;
 
-    view.id      = this.get('iTunesId');
+    view.id      = this.get(`${service}.id`);
     view.title   = this.get('title');
-    view.artist  = this.get('artist').get('name');
-    view.cover   = this.get('cover');
-    view.preview = this.get('preview');
+    view.artist  = this.get('artist');
+    view.cover   = this.get(`${service}.cover`);
+    view.preview = this.get(`${service}.preview`);
+    view.service = service;
 
     return view;
   }
 
-  // setup
-  setup(iTunesId) {
-    let result, artist, song = this;
+  // fetchFromService
+  fetchFromService(service, id) {
+    let song = this;
+    let result;
 
-    iTunesId = iTunesId || this.get('iTunesId');
+    return service.lookup(id).then(function(response) {
+      result = response;
 
-    return Parse.Cloud.httpRequest({
-      url: 'https://itunes.apple.com/lookup',
-      params: {id: iTunesId, limit: 1}
-    }).then(function(response) {
-      if (response.status == 200) {
-        let results = JSON.parse(response.text).results;
-
-        if (results.length) {
-          result = results[0];
-
-          return Artist.create(result.artistId, result.artistName);
-        } else {
-          return Parse.Promise.error('Song does not exist on iTunes');
-        }
+      if (song.get('genre')) {
+        return Parse.Promise.as(song.get('genre'));
       } else {
-        return Parse.Promise.error('Could not connect to iTunes');
+        return Genre.create(result.genre);
       }
-    }).then(function(response) {
-      artist = response;
-
-      return Genre.create(result.primaryGenreName);
     }).then(function(genre) {
-      song.set('title', result.trackName);
-      song.set('artist', artist);
-      song.set('cover', result.artworkUrl100);
-      song.set('preview', result.previewUrl);
-      song.set('genre', genre);
+      song.get('title')  || song.set('title', result.title);
+      song.get('artist') || song.set('artist', result.artist);
+      song.get('genre')  || song.set('genre', genre);
+      song.set(service.name, {
+        id: result.id,
+        cover: result.cover,
+        preview: result.preview
+      });
 
       return Parse.Promise.as();
     });
@@ -76,66 +64,69 @@ export default class Song extends Parse.Object {
 
     let song = request.object;
 
-    if (!song.get('iTunesId')) return response.error('Empty iTunesId');
-
     song.schematize();
+    response.success();
+  }
 
-    if (song.dirty('iTunesId')) {
-      song.setup().then(response.success, response.error);
-    } else {
-      response.success();
+  // afterSave
+  static afterSave(request) {
+    Parse.Cloud.useMasterKey();
+
+    let song = request.object;
+    let services = Service.availableServices;
+    let promises = [];
+
+    for (var i = 0; i < services.length; i++) {
+      let service = services[i];
+
+      if (!song.get(service.name)) {
+        promises.push(service.match(song.view()));
+      }
     }
+
+    Parse.Promise.when(promises).then(function() {
+      for (var i = 0; i < arguments.length; i++) {
+        let match = arguments[i];
+        console.log(`Setting match ${match.title}`);
+
+        if (match) {
+          song.set(match.service, {
+            id: match.id,
+            cover: match.cover,
+            preview: match.preview
+          });
+        }
+      }
+
+      song.save();
+    });
   }
 
   // create
-  static create(iTunesId) {
+  static create(service, id) {
     Parse.Cloud.useMasterKey();
 
     let songs = new Parse.Query(Song);
 
-    songs.include(['artist', 'genre']);
-    songs.equalTo('iTunesId', iTunesId);
+    songs.include('genre');
+    songs.exists(`${service.name}`);
+    songs.equalTo(`${service.name}.id`, id);
 
     return songs.first().then(function(song) {
       if (song) {
         return Parse.Promise.as(song);
       } else {
         song = new Song;
-        song.set('iTunesId', iTunesId);
-
-        return song.save();
+        return song.fetchFromService(service, id).then(function() {
+          return song.save();
+        });
       }
     });
   }
 
   // search
-  static search(string, limit = 10) {
-    return Parse.Cloud.httpRequest({
-      url: 'https://itunes.apple.com/search',
-      params: {term: string, media: 'music', limit: limit}
-    }).then(function(response) {
-      if (response.status == 200) {
-        let results = JSON.parse(response.text).results;
-        let songs = [];
-
-        for (let i = 0; i < results.length; i++) {
-          let result = results[i];
-          let song = {};
-
-          song.id = result.trackId;
-          song.title = result.trackName;
-          song.artist = result.artistName;
-          song.cover = result.artworkUrl100;
-          song.preview = result.previewUrl;
-
-          songs.push(song);
-        }
-
-        return Parse.Promise.as(songs);
-      } else {
-        return Parse.Promise.error('Could not connect to iTunes');
-      }
-    });
+  static search(service, string, limit = 22) {
+    return service.search(string, limit);
   }
 }
 

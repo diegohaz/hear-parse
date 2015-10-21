@@ -1,3 +1,5 @@
+import Service from './Service';
+
 export default class User extends Parse.Object {
 	constructor() {
 		super('_User');
@@ -7,10 +9,9 @@ export default class User extends Parse.Object {
 	schematize() {
 		this.get('name') 				|| this.set('name', '');
 		this.get('picture') 		|| this.set('picture', '');
-		this.get('services') 		|| this.set('services', {});
+		this.get('service') 		|| this.set('service', null);
 		this.get('identified')	|| this.set('identified', false);
 		this.get('genres')			|| this.set('genres', []);
-		this.get('artists')			|| this.set('artists', []);
 	}
 
 	// beforeSave
@@ -20,6 +21,14 @@ export default class User extends Parse.Object {
 		user.schematize();
 
 		response.success();
+	}
+
+	// get service
+	static get currentService() {
+		let user = Parse.User.current();
+		let service = user? user.get('service') : 'itunes';
+
+		return new Service(service? service.name : null)
 	}
 }
 

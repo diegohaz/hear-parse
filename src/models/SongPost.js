@@ -1,4 +1,5 @@
 import Song from './Song';
+import User from './User';
 
 export default class SongPost extends Parse.Object {
   constructor() {
@@ -7,8 +8,10 @@ export default class SongPost extends Parse.Object {
 
   // schematize
   schematize() {
-    this.get('song')      || this.set('song', Song.createWithoutData('null'));
-    this.get('location')  || this.set('location', new Parse.GeoPoint());
+    this.get('user')     || this.set('user', Parse.User.current());
+    this.get('song')     || this.set('song', Song.createWithoutData('null'));
+    this.get('story')    || this.set('story', '');
+    this.get('location') || this.set('location', new Parse.GeoPoint());
 
     this.setACL(new Parse.ACL({'*': {'read': true}}));
   }
@@ -19,6 +22,7 @@ export default class SongPost extends Parse.Object {
 
     songPost.schematize();
 
+    if (!songPost.get('user')) return response.error('Empty user');
     if (!songPost.get('song')) return response.error('Empty song');
     if (!songPost.get('location')) return response.error('Empty location');
 
@@ -26,12 +30,13 @@ export default class SongPost extends Parse.Object {
   }
 
   // Post
-  static post(iTunesId, location) {
+  static post(id, location) {
     Parse.Cloud.useMasterKey();
 
-    return Song.create(iTunesId).then(function(song) {
+    return Song.create(User.currentService, id).then(function(song) {
       let songPost = new SongPost;
 
+      songPost.set('user', Parse.User.current());
       songPost.set('song', song);
       songPost.set('location', location);
 
@@ -47,7 +52,7 @@ export default class SongPost extends Parse.Object {
   static list(location, limit = 30, skip = 0) {
     let songPosts = new Parse.Query(SongPost);
 
-    songPosts.include(['song', 'song.artist']);
+    songPosts.include(['song', 'song.genre']);
     songPosts.near('location', location);
     songPosts.withinKilometers('location', location, 20000);
     songPosts.limit(limit * 10);
