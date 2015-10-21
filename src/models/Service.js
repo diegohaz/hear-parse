@@ -1,3 +1,5 @@
+import User from './User';
+
 export default class Service {
   constructor(name) {
     this.name = name || 'itunes';

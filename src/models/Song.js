@@ -2,7 +2,6 @@ import Genre from './Genre';
 import User from './User';
 import Service from './Service';
 
-// HERE
 export default class Song extends Parse.Object {
   constructor() {
     super('Song');

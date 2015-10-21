@@ -12,7 +12,6 @@ export default class User extends Parse.Object {
 		this.get('service') 	 || this.set('service', null);
 		this.get('identified') || this.set('identified', false);
     this.get('genres')     || this.set('genres', []);
-    this.get('country')    || this.set('country', 'US');
 		this.get('locale')     || this.set('locale', 'en');
 	}
 
@@ -24,14 +23,6 @@ export default class User extends Parse.Object {
 
 		response.success();
 	}
-
-  // get country
-  static get currentCountry() {
-    let user = Parse.User.current();
-    let country = user? user.get('country') : 'US';
-
-    return country;
-  }
 
   // get locale
   static get currentLocale() {
