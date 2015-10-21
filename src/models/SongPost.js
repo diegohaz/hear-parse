@@ -1,5 +1,6 @@
 import Song from './Song';
 import User from './User';
+import moment from 'moment/min/moment-with-locales.min';
 
 export default class SongPost extends Parse.Object {
   constructor() {
@@ -72,6 +73,7 @@ export default class SongPost extends Parse.Object {
           let view = song.view();
 
           view.distance = songPost.get('location').kilometersTo(location)*1000;
+          view.time = moment(song.createdAt).fromNow();
 
           songsIds.push(song.id);
           views.push(view);

@@ -23,5 +23,8 @@
   "devDependencies": {
     "babelify": "^6.3.0",
     "browserify": "^11.0.1"
+  },
+  "dependencies": {
+    "moment": "^2.10.6"
   }
 }
