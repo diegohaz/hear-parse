@@ -6,7 +6,8 @@ export default class Service {
   static get availableServices() {
     return [
       new Service('itunes'),
-      new Service('spotify')
+      new Service('spotify'),
+      new Service('deezer')
     ];
   }
 
@@ -20,6 +21,9 @@ export default class Service {
         break;
       case 'spotify':
         term = `track:${song.title} artist:${song.artist}`;
+        break;
+      case 'deezer':
+        term = `track:"${song.title}" artist:"${song.artist}"`;
         break;
     }
 
@@ -43,6 +47,9 @@ export default class Service {
         request.url = 'https://api.spotify.com/v1/tracks/' + id;
         request.params = {};
         break;
+      case 'deezer':
+        request.url = 'http://api.deezer.com/track/' + id;
+        request.params = {};
     }
 
     return Parse.Cloud.httpRequest(request).then(function(response) {
@@ -65,13 +72,17 @@ export default class Service {
     let request = {};
 
     switch (this.name) {
+      case 'itunes':
+        request.url = 'https://itunes.apple.com/search';
+        request.params = {term: term, limit: limit, media: 'music'};
+        break;
       case 'spotify':
         request.url = 'https://api.spotify.com/v1/search';
         request.params = {q: term, limit: limit, type: 'track'};
         break;
-      case 'itunes':
-        request.url = 'https://itunes.apple.com/search';
-        request.params = {term: term, limit: limit, media: 'music'};
+      case 'deezer':
+        request.url = 'http://api.deezer.com/search/track/';
+        request.params = {q: term};
         break;
     }
 
@@ -93,6 +104,18 @@ export default class Service {
     let result = {};
 
     switch (this.name) {
+      case 'itunes':
+        response = response.results? response.results[0] : response;
+        if (response) {
+          result.id      = response.trackId;
+          result.title   = response.trackName;
+          result.artist  = response.artistName;
+          result.cover   = response.artworkUrl100;
+          result.preview = response.previewUrl;
+          result.genre   = response.primaryGenreName;
+          result.service = this.name;
+        }
+        break;
       case 'spotify':
         if (response) {
           result.id      = response.id;
@@ -103,15 +126,13 @@ export default class Service {
           result.service = this.name;
         }
         break;
-      case 'itunes':
-        response = response.results? response.results[0] : response;
+      case 'deezer':
         if (response) {
-          result.id      = response.trackId;
-          result.title   = response.trackName;
-          result.artist  = response.artistName;
-          result.cover   = response.artworkUrl100;
-          result.preview = response.previewUrl;
-          result.genre   = response.primaryGenreName;
+          result.id      = response.id;
+          result.title   = response.title;
+          result.artist  = response.artist.name;
+          result.cover   = response.album.cover_medium;
+          result.preview = response.preview;
           result.service = this.name;
         }
         break;
@@ -129,18 +150,19 @@ export default class Service {
     let result = [];
 
     switch (this.name) {
-      case 'spotify':
-        let response = response.tracks.items;
-
-        for (var i = 0; i < response.length; i++) {
-          result.push(this.parseLookupResponse(response[i]));
-        }
-        break;
       case 'itunes':
-        for (var i = 0; i < response.results.length; i++) {
-          result.push(this.parseLookupResponse(response[i]));
-        }
+        response = response.results;
         break;
+      case 'spotify':
+        response = response.tracks.items;
+        break;
+      case 'deezer':
+        response = response.data;
+        break;
+    }
+
+    for (var i = 0; i < response.length; i++) {
+      result.push(this.parseLookupResponse(response[i]));
     }
 
     return result;

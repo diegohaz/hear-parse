@@ -8,7 +8,7 @@ export default class SongPost extends Parse.Object {
 
   // schematize
   schematize() {
-    this.get('user')     || this.set('user', Parse.User.current());
+    this.get('user')     || this.set('user', User.createWithoutData('null'));
     this.get('song')     || this.set('song', Song.createWithoutData('null'));
     this.get('story')    || this.set('story', '');
     this.get('location') || this.set('location', new Parse.GeoPoint());

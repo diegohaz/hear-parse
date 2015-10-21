@@ -7,11 +7,11 @@ export default class User extends Parse.Object {
 
 	// schematize
 	schematize() {
-		this.get('name') 				|| this.set('name', '');
-		this.get('picture') 		|| this.set('picture', '');
-		this.get('service') 		|| this.set('service', null);
-		this.get('identified')	|| this.set('identified', false);
-		this.get('genres')			|| this.set('genres', []);
+		this.get('name') 			 || this.set('name', '');
+		this.get('picture') 	 || this.set('picture', '');
+		this.get('service') 	 || this.set('service', null);
+		this.get('identified') || this.set('identified', false);
+		this.get('genres')     || this.set('genres', []);
 	}
 
 	// beforeSave

@@ -21,11 +21,11 @@ export default class Song extends Parse.Object {
     let view = {};
     let service = User.currentService.name;
 
-    view.id      = this.get(`${service}.id`);
+    view.id      = this.get(service).id;
     view.title   = this.get('title');
     view.artist  = this.get('artist');
-    view.cover   = this.get(`${service}.cover`);
-    view.preview = this.get(`${service}.preview`);
+    view.cover   = this.get(service).cover;
+    view.preview = this.get(service).preview;
     view.service = service;
 
     return view;
@@ -49,7 +49,7 @@ export default class Song extends Parse.Object {
       song.get('artist') || song.set('artist', result.artist);
       song.get('genre')  || song.set('genre', genre);
       song.set(service.name, {
-        id: result.id,
+        id: '' + result.id,
         cover: result.cover,
         preview: result.preview
       });
@@ -91,7 +91,7 @@ export default class Song extends Parse.Object {
 
         if (match) {
           song.set(match.service, {
-            id: match.id,
+            id: '' + match.id,
             cover: match.cover,
             preview: match.preview
           });
