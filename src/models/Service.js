@@ -1,5 +1,3 @@
-import User from './User';
-
 export default class Service {
   constructor(name) {
     this.name = name || 'itunes';
@@ -116,6 +114,7 @@ export default class Service {
           result.cover   = response.artworkUrl100;
           result.preview = response.previewUrl;
           result.genre   = response.primaryGenreName;
+          result.url     = response.trackViewUrl;
           result.service = this.name;
         }
         break;
@@ -126,6 +125,7 @@ export default class Service {
           result.artist  = response.artists[0].name;
           result.cover   = response.album.images[1].url;
           result.preview = response.preview_url;
+          result.url     = response.external_urls.spotify;
           result.service = this.name;
         }
         break;
@@ -136,6 +136,7 @@ export default class Service {
           result.artist  = response.artist.name;
           result.cover   = response.album.cover_medium;
           result.preview = response.preview;
+          result.url     = response.link;
           result.service = this.name;
         }
         break;

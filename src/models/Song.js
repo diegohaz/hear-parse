@@ -26,8 +26,19 @@ export default class Song extends Parse.Object {
     view.cover   = this.get(service).cover;
     view.preview = this.get(service).preview;
     view.service = service;
+    view.serviceUrl = this.get(service).url;
 
     return view;
+  }
+
+  // setService
+  setService(serviceName, data) {
+    this.set(serviceName, {
+      id: '' + data.id,
+      cover: data.cover,
+      preview: data.preview,
+      url: data.url
+    });
   }
 
   // fetchFromService
@@ -47,11 +58,7 @@ export default class Song extends Parse.Object {
       song.get('title')  || song.set('title', result.title);
       song.get('artist') || song.set('artist', result.artist);
       song.get('genre')  || song.set('genre', genre);
-      song.set(service.name, {
-        id: '' + result.id,
-        cover: result.cover,
-        preview: result.preview
-      });
+      song.setService(service.name, result);
 
       return Parse.Promise.as();
     });
@@ -90,11 +97,7 @@ export default class Song extends Parse.Object {
           console.log(`Setting match ${match.title}`);
 
           if (match) {
-            song.set(match.service, {
-              id: '' + match.id,
-              cover: match.cover,
-              preview: match.preview
-            });
+            song.setService(match.service, match);
           }
         }
 
