@@ -9,10 +9,9 @@ export default class User extends Parse.Object {
 	schematize() {
 		this.get('name') 			 || this.set('name', '');
 		this.get('picture') 	 || this.set('picture', '');
-		this.get('service') 	 || this.set('service', null);
+		this.get('service') 	 || this.set('service', {name: 'itunes'});
 		this.get('identified') || this.set('identified', false);
     this.get('genres')     || this.set('genres', []);
-		this.get('locale')     || this.set('locale', 'en');
 	}
 
 	// beforeSave
@@ -23,14 +22,6 @@ export default class User extends Parse.Object {
 
 		response.success();
 	}
-
-  // get locale
-  static get currentLocale() {
-    let user = Parse.User.current();
-    let locale = user? user.get('locale') : 'en';
-
-    return locale;
-  }
 
 	// get service
 	static get currentService() {
