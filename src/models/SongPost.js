@@ -81,8 +81,6 @@ export default class SongPost extends Parse.Object {
       }
 
       results.nextPage = skip;
-      results.minDistance = views[0].distance;
-      results.maxDistance = views[views.length - 1].distance;
       results.songs = views;
 
       return Parse.Promise.as(results);
