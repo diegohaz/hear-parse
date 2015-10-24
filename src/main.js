@@ -29,8 +29,8 @@ Parse.Cloud.define('postSong', function(request, response) {
 Parse.Cloud.define('listSongs', function(request, response) {
   let lat = +request.params.lat;
   let lng = +request.params.lng;
-  let limit = request.params.limit;
-  let skip = request.params.skip;
+  let limit = request.params.limit || undefined;
+  let skip = request.params.skip || undefined;
 
   let location = new Parse.GeoPoint({latitude: lat, longitude: lng});
 

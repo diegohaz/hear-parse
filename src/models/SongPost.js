@@ -50,7 +50,7 @@ export default class SongPost extends Parse.Object {
   }
 
   // list
-  static list(location, limit = 30, skip = 0) {
+  static list(location, limit = 22, skip = 0) {
     let songPosts = new Parse.Query(SongPost);
 
     songPosts.include(['song', 'song.genre']);
