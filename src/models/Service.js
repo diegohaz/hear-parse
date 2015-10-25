@@ -166,6 +166,10 @@ export default class Service {
     }
 
     for (var i = 0; i < response.length; i++) {
+      if (this.name == 'itunes' && !response[i].isStreamable) {
+        continue;
+      }
+
       result.push(this.parseLookupResponse(response[i]));
     }
 
