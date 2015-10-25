@@ -37,7 +37,7 @@ export default class Song extends Parse.Object {
       id: '' + data.id,
       cover: data.cover,
       preview: data.preview,
-      url: data.url
+      url: data.serviceUrl
     });
   }
 
@@ -129,7 +129,7 @@ export default class Song extends Parse.Object {
   }
 
   // search
-  static search(service, string, limit = 22) {
+  static search(service, string, limit = 10) {
     return service.search(string, limit);
   }
 }

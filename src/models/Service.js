@@ -75,7 +75,7 @@ export default class Service {
     switch (this.name) {
       case 'itunes':
         request.url = 'https://itunes.apple.com/search';
-        request.params = {term: term, limit: limit, media: 'music'};
+        request.params = {term: term, limit: limit, media: 'music', country: 'BR'};
         break;
       case 'spotify':
         request.url = 'https://api.spotify.com/v1/search';
@@ -108,14 +108,14 @@ export default class Service {
       case 'itunes':
         response = response.results? response.results[0] : response;
         if (response) {
-          result.id      = response.trackId;
+          result.id      = '' + response.trackId;
           result.title   = response.trackName;
           result.artist  = response.artistName;
           result.cover   = response.artworkUrl100;
           result.preview = response.previewUrl;
           result.genre   = response.primaryGenreName;
-          result.url     = response.trackViewUrl;
           result.service = this.name;
+          result.serviceUrl = response.trackViewUrl;
         }
         break;
       case 'spotify':
@@ -125,8 +125,8 @@ export default class Service {
           result.artist  = response.artists[0].name;
           result.cover   = response.album.images[1].url;
           result.preview = response.preview_url;
-          result.url     = response.external_urls.spotify;
           result.service = this.name;
+          result.serviceUrl = response.external_urls.spotify;
         }
         break;
       case 'deezer':
@@ -136,8 +136,8 @@ export default class Service {
           result.artist  = response.artist.name;
           result.cover   = response.album.cover_medium;
           result.preview = response.preview;
-          result.url     = response.link;
           result.service = this.name;
+          result.serviceUrl = response.link;
         }
         break;
     }
