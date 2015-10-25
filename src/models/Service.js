@@ -41,7 +41,7 @@ export default class Service {
     switch (this.name) {
       case 'itunes':
         request.url = 'https://itunes.apple.com/lookup';
-        request.params = {id: id, limit: 1};
+        request.params = {id: id, limit: 1, country: 'BR'};
         break;
       case 'spotify':
         request.url = 'https://api.spotify.com/v1/tracks/' + id;

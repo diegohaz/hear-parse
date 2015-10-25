@@ -44,6 +44,8 @@ export default class SongPost extends Parse.Object {
       return songPost.save().then(function(songPost) {
         let view = song.view();
 
+        view.distance = 0;
+
         return Parse.Promise.as(view);
       });
     });
