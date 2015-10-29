@@ -25,6 +25,10 @@ export default class Genre extends Parse.Object {
   static create(name) {
     Parse.Cloud.useMasterKey();
 
+    if (!name) {
+      return Parse.Promise.as();
+    }
+
     let genres = new Parse.Query(Genre);
 
     genres.equalTo('name', name);

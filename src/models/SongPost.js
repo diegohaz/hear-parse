@@ -55,8 +55,12 @@ export default class SongPost extends Parse.Object {
   static list(location, limit = 22, skip = 0) {
     let songPosts = new Parse.Query(SongPost);
 
+    let songQuery = new Parse.Query(Song);
+    songQuery.exists(User.currentService.name);
+
     songPosts.include(['song', 'song.genre']);
     songPosts.near('location', location);
+    songPosts.matchesQuery('song', songQuery);
     songPosts.withinKilometers('location', location, 20000);
     songPosts.limit(limit * 10);
     songPosts.skip(skip);
