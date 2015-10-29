@@ -14,16 +14,17 @@ export default class Service {
   // match
   match(song) {
     let term = '';
+    let title = song.title.replace(/ ?\(.+\)/, '');
 
     switch (this.name) {
       case 'itunes':
-        term = `${song.title} ${song.artist}`;
+        term = `${title} ${song.artist}`;
         break;
       case 'spotify':
-        term = `track:${song.title} artist:${song.artist}`;
+        term = `track:${title} artist:${song.artist}`;
         break;
       case 'deezer':
-        term = `track:"${song.title}" artist:"${song.artist}"`;
+        term = `track:"${title}" artist:"${song.artist}"`;
         break;
     }
 
