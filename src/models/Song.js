@@ -81,6 +81,7 @@ export default class Song extends Parse.Object {
     let song = request.object;
     let services = Service.availableServices;
     let promises = [];
+    let genre;
 
     for (var i = 0; i < services.length; i++) {
       let service = services[i];
@@ -98,12 +99,17 @@ export default class Song extends Parse.Object {
           if (!match) continue;
 
           console.log(`Setting match ${match.title}`);
-
-          if (match) {
-            song.setService(match.service, match);
-          }
+          genre = genre || match.genre;
+          song.setService(match.service, match);
         }
 
+        if (!song.get('genre') && genre) {
+          return Genre.create(genre);
+        } else {
+          return Parse.Promise.as(song.get('genre'));
+        }
+      }).then(function(genre) {
+        song.set('genre', genre);
         song.save();
       });
     }
