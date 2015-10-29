@@ -14,7 +14,7 @@ export default class Service {
   // match
   match(song) {
     let term = '';
-    let title = song.title.replace(/\.|,| ?\(.+\)/g, '');
+    let title = song.title.replace(/ ?\-.+$|\.|,| ?\(.+\)/g, '');
 
     switch (this.name) {
       case 'itunes':

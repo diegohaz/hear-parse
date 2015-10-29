@@ -94,6 +94,9 @@ export default class Song extends Parse.Object {
       Parse.Promise.when(promises).then(function() {
         for (var i = 0; i < arguments.length; i++) {
           let match = arguments[i];
+
+          if (!match) continue;
+
           console.log(`Setting match ${match.title}`);
 
           if (match) {
