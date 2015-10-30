@@ -1,6 +1,6 @@
 export default class Service {
   constructor(name) {
-    this.name = name || 'spotify';
+    this.name = name || 'itunes';
   }
 
   static get availableServices() {
