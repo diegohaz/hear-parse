@@ -2,12 +2,14 @@ import User from './models/User';
 import Song from './models/Song';
 import SongPost from './models/SongPost';
 import Genre from './models/Genre';
+import Artist from './models/Artist';
 
 Parse.Cloud.beforeSave('_User', User.beforeSave);
+Parse.Cloud.beforeSave('Artist', Artist.beforeSave);
+Parse.Cloud.beforeSave('Genre', Genre.beforeSave);
 Parse.Cloud.beforeSave('Song', Song.beforeSave);
 Parse.Cloud.afterSave('Song', Song.afterSave);
 Parse.Cloud.beforeSave('SongPost', SongPost.beforeSave);
-Parse.Cloud.beforeSave('Genre', Genre.beforeSave);
 
 Parse.Cloud.define('searchSong', function(request, response) {
   let string = request.params.string;
