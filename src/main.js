@@ -24,7 +24,7 @@ Parse.Cloud.define('fetchPlace', function(request, response) {
 
 Parse.Cloud.define('searchSong', function(request, response) {
   let string = request.params.string;
-  let limit = request.params.limit;
+  let limit = request.params.limit || undefined;
 
   Song.search(User.current.service, string, limit).then(response.success, response.error);
 });
@@ -32,9 +32,9 @@ Parse.Cloud.define('searchSong', function(request, response) {
 Parse.Cloud.define('listPlacedSongs', function(request, response) {
   let latitude = +request.params.latitude;
   let longitude = +request.params.longitude;
-  let limit = request.params.limit;
-  let offset = request.params.offset;
-  let excludeIds = request.params.excludeIds;
+  let limit = request.params.limit || undefined;
+  let offset = request.params.offset || undefined;
+  let excludeIds = request.params.excludeIds || undefined;
 
   let location = new Parse.GeoPoint(latitude, longitude);
 

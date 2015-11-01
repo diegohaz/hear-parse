@@ -21,10 +21,9 @@ export default class PlacedSong extends Parse.Object {
   view() {
     let view = this.get('song').view();
 
-    view.placedId = this.id;
+    view.id       = this.id;
     view.user     = this.get('user').view();
     view.url      = 'http://hear.ws/p/' + this.id;
-    view.likes    = this.get('likes');
     view.location = {
       latitude: this.get('location').latitude,
       longitude: this.get('location').longitude
@@ -88,7 +87,7 @@ export default class PlacedSong extends Parse.Object {
 
     let placedSongs = new Parse.Query(PlacedSong);
 
-    placedSongs.include(['song', 'song.genre']);
+    placedSongs.include(['song', 'song.genre', 'song.artist']);
     placedSongs.near('location', location);
     placedSongs.matchesQuery('song', songQuery);
     placedSongs.withinKilometers('location', location, 20000);

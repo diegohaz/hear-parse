@@ -20,13 +20,13 @@ export default class Service {
 
     switch (this.name) {
       case 'itunes':
-        term = `${title} ${song.artist}`;
+        term = `${title} ${song.artist.name}`;
         break;
       case 'spotify':
-        term = `track:${title} artist:${song.artist}`;
+        term = `track:${title} artist:${song.artist.name}`;
         break;
       case 'deezer':
-        term = `track:"${title}" artist:"${song.artist}"`;
+        term = `track:"${title}" artist:"${song.artist.name}"`;
         break;
     }
 

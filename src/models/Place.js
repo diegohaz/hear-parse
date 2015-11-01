@@ -42,8 +42,8 @@ export default class Place {
         for (let i = 0; i < types.length; i++) {
           let type = types[i];
 
-          for (let i = 0; i < results.length; i++) {
-            let result = results[i];
+          for (let j = 0; j < results.length; j++) {
+            let result = results[j];
 
             if (~result.types.indexOf(type)) {
               let name = result.address_components[0].long_name.replace('State of ', '');
