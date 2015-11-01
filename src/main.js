@@ -42,12 +42,11 @@ Parse.Cloud.define('listPlacedSongs', function(request, response) {
 });
 
 Parse.Cloud.define('placeSong', function(request, response) {
-  let id = request.params.id;
+  let serviceId = request.params.serviceId;
   let latitude = +request.params.latitude;
   let longitude = +request.params.longitude;
-  let story = request.params.story;
 
   let location = new Parse.GeoPoint(latitude, longitude);
 
-  PlacedSong.place(id, location, story).then(response.success, response.error);
+  PlacedSong.place(serviceId, location).then(response.success, response.error);
 });

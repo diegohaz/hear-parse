@@ -1,7 +1,7 @@
 import Artist from './Artist';
 import Song from './Song';
 import User from './User';
-import moment from 'moment/min/moment-with-locales.min';
+//import moment from 'moment/min/moment-with-locales.min';
 
 export default class PlacedSong extends Parse.Object {
   constructor() {
@@ -12,8 +12,6 @@ export default class PlacedSong extends Parse.Object {
   schematize() {
     this.get('user')     || this.set('user', User.createWithoutData('null'));
     this.get('song')     || this.set('song', Song.createWithoutData('null'));
-    this.get('story')    || this.set('story', '');
-    this.get('removes')  || this.set('removes', 0);
     this.get('location') || this.set('location', new Parse.GeoPoint());
 
     this.setACL(new Parse.ACL({'*': {'read': true}}));
@@ -27,7 +25,6 @@ export default class PlacedSong extends Parse.Object {
     view.id       = this.id;
     view.user     = this.get('user').view();
     view.url      = 'http://hear.ws/p/' + this.id;
-    view.story    = this.get('story');
     view.likes    = this.get('likes');
     view.location = {
       latitude: this.get('location').latitude,
@@ -51,7 +48,7 @@ export default class PlacedSong extends Parse.Object {
   }
 
   // Post
-  static place(id, location, story) {
+  static place(id, location) {
     Parse.Cloud.useMasterKey();
 
     return Song.create(User.current.service, id).then(function(song) {
@@ -60,7 +57,6 @@ export default class PlacedSong extends Parse.Object {
       placedSong.set('user', User.current);
       placedSong.set('song', song);
       placedSong.set('location', location);
-      placedSong.set('story', story);
 
       return placedSong.save().then(function(placedSong) {
         let view = placedSong.view();
@@ -81,12 +77,11 @@ export default class PlacedSong extends Parse.Object {
 
     songQuery.exists(User.current.service.name);
 
-    if (removedSongs.length || excludeIds.length) {
-      songQuery.notContainedIn(serviceName + '.id', excludeIds);
-      songQuery.notContainedIn(serviceName + '.id', User.current.removedSongs);
+    if (removedSongs.length) {
+      songQuery.notContainedIn('objectId', User.current.removedSongs);
     }
 
-    if (removedArtists) {
+    if (removedArtists.length) {
       let artistQuery = new Parse.Query(Artist);
       artistQuery.notContainedIn('objectId', removedArtists);
       songQuery.matchesQuery('artist', artistQuery);
@@ -102,7 +97,7 @@ export default class PlacedSong extends Parse.Object {
     placedSongs.skip(offset);
 
     return placedSongs.find().then(function(placedSongs) {
-      let songsIds = [];
+      let songsIds = excludeIds;
       let views = [];
       let results = {};
 

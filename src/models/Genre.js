@@ -42,7 +42,7 @@ export default class Genre extends Parse.Object {
       } else {
         genre = new Genre;
         genre.set('name', name);
-        genre.set('country', country);
+        genre.set('country', User.current.country);
 
         return genre.save();
       }
