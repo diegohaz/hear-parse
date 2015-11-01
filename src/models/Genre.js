@@ -1,3 +1,5 @@
+import User from './User';
+
 export default class Genre extends Parse.Object {
   constructor() {
     super('Genre');
@@ -32,6 +34,7 @@ export default class Genre extends Parse.Object {
     let genres = new Parse.Query(Genre);
 
     genres.equalTo('name', name);
+    genres.equalTo('country', User.current.country);
 
     return genres.first().then(function(genre) {
       if (genre) {
@@ -39,6 +42,7 @@ export default class Genre extends Parse.Object {
       } else {
         genre = new Genre;
         genre.set('name', name);
+        genre.set('country', country);
 
         return genre.save();
       }
