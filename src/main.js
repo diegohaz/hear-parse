@@ -1,40 +1,53 @@
 import User from './models/User';
 import Song from './models/Song';
-import SongPost from './models/SongPost';
+import PlacedSong from './models/PlacedSong';
 import Genre from './models/Genre';
 import Artist from './models/Artist';
+import Place from './models/Place';
+import Tests from './tests';
 
 Parse.Cloud.beforeSave('_User', User.beforeSave);
 Parse.Cloud.beforeSave('Artist', Artist.beforeSave);
 Parse.Cloud.beforeSave('Genre', Genre.beforeSave);
 Parse.Cloud.beforeSave('Song', Song.beforeSave);
 Parse.Cloud.afterSave('Song', Song.afterSave);
-Parse.Cloud.beforeSave('SongPost', SongPost.beforeSave);
+Parse.Cloud.beforeSave('PlacedSong', PlacedSong.beforeSave);
+
+Parse.Cloud.define('fetchPlace', function(request, response) {
+  let latitude = +request.params.latitude;
+  let longitude = +request.params.longitude;
+
+  let location = new Parse.GeoPoint(latitude, longitude);
+
+  Place.fetch(location).then(response.success, response.error);
+});
 
 Parse.Cloud.define('searchSong', function(request, response) {
   let string = request.params.string;
   let limit = request.params.limit;
 
-  Song.search(User.currentService, string, limit).then(response.success, response.error);
+  Song.search(User.current.service, string, limit).then(response.success, response.error);
 });
 
-Parse.Cloud.define('postSong', function(request, response) {
+Parse.Cloud.define('listPlacedSongs', function(request, response) {
+  let latitude = +request.params.latitude;
+  let longitude = +request.params.longitude;
+  let limit = request.params.limit;
+  let offset = request.params.offset;
+  let excludeIds = request.params.excludeIds;
+
+  let location = new Parse.GeoPoint(latitude, longitude);
+
+  PlacedSong.list(location, limit, offset, excludeIds).then(response.success, response.error);
+});
+
+Parse.Cloud.define('placeSong', function(request, response) {
   let id = request.params.id;
-  let lat = +request.params.lat;
-  let lng = +request.params.lng;
+  let latitude = +request.params.latitude;
+  let longitude = +request.params.longitude;
+  let story = request.params.story;
 
-  let location = new Parse.GeoPoint(lat, lng);
+  let location = new Parse.GeoPoint(latitude, longitude);
 
-  SongPost.post(id, location).then(response.success, response.error);
-});
-
-Parse.Cloud.define('listSongs', function(request, response) {
-  let lat = +request.params.lat;
-  let lng = +request.params.lng;
-  let limit = request.params.limit || undefined;
-  let skip = request.params.skip || undefined;
-
-  let location = new Parse.GeoPoint({latitude: lat, longitude: lng});
-
-  SongPost.list(location, limit, skip).then(response.success, response.error);
+  PlacedSong.place(id, location, story).then(response.success, response.error);
 });

@@ -1,3 +1,4 @@
+import Artist from './Artist';
 import Genre from './Genre';
 import User from './User';
 import Service from './Service';
@@ -10,7 +11,8 @@ export default class Song extends Parse.Object {
   // schematize
   schematize() {
     this.get('title')  || this.set('title', '');
-    this.get('artist') || this.set('artist', '');
+    this.get('artist') || this.set('artist', new Artist);
+    this.get('genre')  || this.set('genre', new Genre);
 
     this.setACL(new Parse.ACL({'*': {'read': true}}));
   }
@@ -18,14 +20,15 @@ export default class Song extends Parse.Object {
   // view
   view() {
     let view = {};
-    let service = User.currentService.name;
+    let service = User.current.service.name;
 
-    view.id      = this.get(service).id;
-    view.title   = this.get('title');
-    view.artist  = this.get('artist');
-    view.cover   = this.get(service).cover;
-    view.preview = this.get(service).preview;
-    view.service = service;
+    view.id         = this.id;
+    view.title      = this.get('title');
+    view.artist     = this.get('artist').get('name');
+    view.imageUrl   = this.get(service).imageUrl;
+    view.previewUrl = this.get(service).previewUrl;
+    view.service    = service;
+    view.serviceId  = this.get(service).id;
     view.serviceUrl = this.get(service).url;
 
     return view;
@@ -34,9 +37,9 @@ export default class Song extends Parse.Object {
   // setService
   setService(serviceName, data) {
     this.set(serviceName, {
-      id: '' + data.id,
-      cover: data.cover,
-      preview: data.preview,
+      id: '' + data.serviceId,
+      imageUrl: data.imageUrl,
+      previewUrl: data.previewUrl,
       url: data.serviceUrl
     });
   }
@@ -44,7 +47,7 @@ export default class Song extends Parse.Object {
   // fetchFromService
   fetchFromService(service, id) {
     let song = this;
-    let result;
+    let result, genre;
 
     return service.lookup(id).then(function(response) {
       result = response;
@@ -54,9 +57,17 @@ export default class Song extends Parse.Object {
       } else {
         return Genre.create(result.genre);
       }
-    }).then(function(genre) {
+    }).then(function(response) {
+      genre = response;
+
+      if (song.get('artist')) {
+        return Parse.Promise.as(song.get('artist'));
+      } else {
+        return Artist.create(result.artist);
+      }
+    }).then(function(artist) {
       song.get('title')  || song.set('title', result.title);
-      song.get('artist') || song.set('artist', result.artist);
+      song.get('artist') || song.set('artist', artist);
       song.get('genre')  || song.set('genre', genre);
       song.setService(service.name, result);
 
@@ -83,36 +94,38 @@ export default class Song extends Parse.Object {
     let promises = [];
     let genre;
 
-    for (var i = 0; i < services.length; i++) {
-      let service = services[i];
+    song.get('artist').fetch().then(function() {
+      for (var i = 0; i < services.length; i++) {
+        let service = services[i];
 
-      if (!song.get(service.name)) {
-        promises.push(service.match(song.view()));
+        if (!song.get(service.name)) {
+          promises.push(service.match(song.view()));
+        }
       }
-    }
 
-    if (promises.length) {
-      Parse.Promise.when(promises).then(function() {
-        for (var i = 0; i < arguments.length; i++) {
-          let match = arguments[i];
+      if (promises.length) {
+        Parse.Promise.when(promises).then(function() {
+          for (var i = 0; i < arguments.length; i++) {
+            let match = arguments[i];
 
-          if (!match) continue;
+            if (!match) continue;
 
-          console.log(`Setting match ${match.title}`);
-          genre = genre || match.genre;
-          song.setService(match.service, match);
-        }
+            console.log(`Setting match ${match.title}`);
+            genre = genre || match.genre;
+            song.setService(match.service, match);
+          }
 
-        if (!song.get('genre') && genre) {
-          return Genre.create(genre);
-        } else {
-          return Parse.Promise.as(song.get('genre'));
-        }
-      }).then(function(genre) {
-        song.set('genre', genre);
-        song.save();
-      });
-    }
+          if (!song.get('genre') && genre) {
+            return Genre.create(genre);
+          } else {
+            return Parse.Promise.as(song.get('genre'));
+          }
+        }).then(function(genre) {
+          song.set('genre', genre);
+          song.save();
+        });
+      }
+    });
   }
 
   // create
@@ -121,8 +134,8 @@ export default class Song extends Parse.Object {
 
     let songs = new Parse.Query(Song);
 
-    songs.include('genre');
-    songs.exists(`${service.name}`);
+    songs.include(['genre', 'artist']);
+    songs.exists(service.name);
     songs.equalTo(`${service.name}.id`, id);
 
     return songs.first().then(function(song) {

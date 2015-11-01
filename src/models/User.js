@@ -7,15 +7,60 @@ export default class User extends Parse.Object {
 
 	// schematize
 	schematize() {
-		this.get('name') 			   || this.set('name', '');
-		this.get('picture') 	   || this.set('picture', '');
-		this.get('service') 	   || this.set('service', {name: 'itunes'});
-		this.get('identified')   || this.set('identified', false);
-    this.get('genres')       || this.set('genres', []);
-    this.get('removedSongs') || this.set('removedSongs', []);
-    this.get('country')      || this.set('country', 'US');
-    this.get('locale')       || this.set('locale', 'en');
+		this.get('name') 			       || this.set('name', '');
+		this.get('pictureUrl') 	     || this.set('pictureUrl', '');
+		this.get('service') 	       || this.set('service', {name: 'itunes'});
+		this.get('identified')       || this.set('identified', false);
+    this.get('removedSongs')     || this.set('removedSongs', []);
+    this.get('removedArtists')   || this.set('removedArtists', []);
+    this.get('country')          || this.set('country', 'US');
+    this.get('locale')           || this.set('locale', 'en');
 	}
+
+  // get service
+  get service() {
+    let service = this.get('service');
+
+    return new Service(service? service.name : null);
+  }
+
+  // get removedSongs
+  get removedSongs() {
+    return this.get('removedSongs')? this.get('removedSongs') : [];
+  }
+
+  // get removedArtists
+  get removedArtists() {
+    return this.get('removedArtists')? this.get('removedArtists') : [];
+  }
+
+  // get country
+  get country() {
+    return this.get('country')? this.get('country') : 'US';
+  }
+
+  // get locale
+  get locale() {
+    return this.get('locale')? this.get('locale') : 'en';
+  }
+
+  // view
+  view() {
+    let view = {};
+
+    view.id = this.id;
+    view.name = this.get('name');
+    view.pictureUrl = this.get('pictureUrl');
+
+    return view;
+  }
+
+  // get current
+  static get current() {
+    let currentUser = Parse.User.current()? Parse.User.current() : User.createWithoutData('EBAL5Jka3s');
+
+    return currentUser;
+  }
 
 	// beforeSave
 	static beforeSave(request, response) {
@@ -25,38 +70,6 @@ export default class User extends Parse.Object {
 
 		response.success();
 	}
-
-	// get currentService
-	static get currentService() {
-		let user = Parse.User.current();
-		let service = user? user.get('service') : 'itunes';
-
-		return new Service(service? service.name : null)
-	}
-
-  // get removedSongs
-  static get removedSongs() {
-    let user = Parse.User.current();
-    let removedSongs = user? user.get('removedSongs') : [];
-
-    return removedSongs;
-  }
-
-  // get country
-  static get country() {
-    let user = Parse.User.current();
-    let country = user? user.get('country') : 'US';
-
-    return country;
-  }
-
-  // get locale
-  static get locale() {
-    let user = Parse.User.current();
-    let locale = user? user.get('locale') : 'en';
-
-    return locale;
-  }
 }
 
 Parse.Object.registerSubclass('_User', User);

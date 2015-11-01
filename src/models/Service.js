@@ -1,3 +1,5 @@
+import User from './User';
+
 export default class Service {
   constructor(name) {
     this.name = name || 'itunes';
@@ -42,11 +44,11 @@ export default class Service {
     switch (this.name) {
       case 'itunes':
         request.url = 'https://itunes.apple.com/lookup';
-        request.params = {id: id, limit: 1, country: 'BR'};
+        request.params = {id: id, limit: 1, country: User.current.country};
         break;
       case 'spotify':
         request.url = 'https://api.spotify.com/v1/tracks/' + id;
-        request.params = {};
+        request.params = {market: User.current.country};
         break;
       case 'deezer':
         request.url = 'http://api.deezer.com/track/' + id;
@@ -58,7 +60,7 @@ export default class Service {
       if (response.status == 200) {
         let result = this.parseLookupResponse(response);
 
-        if (result.id) {
+        if (result.serviceId) {
           return Parse.Promise.as(result);
         } else {
           return Parse.Promise.error(`Song does not exist on service ${this.name}`);
@@ -76,11 +78,21 @@ export default class Service {
     switch (this.name) {
       case 'itunes':
         request.url = 'https://itunes.apple.com/search';
-        request.params = {term: term, limit: limit, media: 'music', country: 'BR'};
+        request.params = {
+          term: term,
+          limit: limit,
+          media: 'music',
+          country: User.current.country
+        };
         break;
       case 'spotify':
         request.url = 'https://api.spotify.com/v1/search';
-        request.params = {q: term, limit: limit, type: 'track'};
+        request.params = {
+          q: term,
+          limit: limit,
+          type: 'track',
+          market: User.current.country
+        };
         break;
       case 'deezer':
         request.url = 'http://api.deezer.com/search/track/';
@@ -109,35 +121,35 @@ export default class Service {
       case 'itunes':
         response = response.results? response.results[0] : response;
         if (response) {
-          result.id      = '' + response.trackId;
-          result.title   = response.trackName;
-          result.artist  = response.artistName;
-          result.cover   = response.artworkUrl100;
-          result.preview = response.previewUrl;
-          result.genre   = response.primaryGenreName;
-          result.service = this.name;
+          result.title      = response.trackName;
+          result.artist     = response.artistName;
+          result.imageUrl   = response.artworkUrl100;
+          result.previewUrl = response.previewUrl;
+          result.genre      = response.primaryGenreName;
+          result.service    = this.name;
+          result.serviceId  = '' + response.trackId;
           result.serviceUrl = response.trackViewUrl;
         }
         break;
       case 'spotify':
         if (response) {
-          result.id      = response.id;
-          result.title   = response.name;
-          result.artist  = response.artists[0].name;
-          result.cover   = response.album.images[1].url;
-          result.preview = response.preview_url;
-          result.service = this.name;
+          result.title      = response.name;
+          result.artist     = response.artists[0].name;
+          result.imageUrl   = response.album.images[1].url;
+          result.previewUrl = response.preview_url;
+          result.service    = this.name;
+          result.serviceId  = response.id;
           result.serviceUrl = response.external_urls.spotify;
         }
         break;
       case 'deezer':
         if (response) {
-          result.id      = response.id;
-          result.title   = response.title;
-          result.artist  = response.artist.name;
-          result.cover   = response.album.cover_medium;
-          result.preview = response.preview;
-          result.service = this.name;
+          result.title      = response.title;
+          result.artist     = response.artist.name;
+          result.imageUrl   = response.album.cover_medium;
+          result.previewUrl = response.preview;
+          result.service    = this.name;
+          result.serviceId  = response.id;
           result.serviceUrl = response.link;
         }
         break;
