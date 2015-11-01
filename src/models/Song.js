@@ -24,7 +24,7 @@ export default class Song extends Parse.Object {
 
     view.id         = this.id;
     view.title      = this.get('title');
-    view.artist     = this.get('artist').get('name');
+    view.artist     = this.get('artist').view();
     view.imageUrl   = this.get(service).imageUrl;
     view.previewUrl = this.get(service).previewUrl;
     view.service    = service;

@@ -10,6 +10,16 @@ export default class Artist extends Parse.Object {
     this.setACL(new Parse.ACL({'*': {'read': true}}));
   }
 
+  // view
+  view() {
+    let view = {};
+
+    view.id = this.id;
+    view.name = this.get('name');
+
+    return view;
+  }
+
   // beforeSave
   static beforeSave(request, response) {
     let artist = request.object;
