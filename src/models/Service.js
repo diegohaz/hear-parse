@@ -154,7 +154,6 @@ export default class Service {
         if (response) {
           result.title      = response.title;
           result.artist     = response.artist.name;
-          result.imageUrl   = response.album.cover_medium;
           result.previewUrl = response.preview;
           result.service    = this.name;
           result.serviceId  = response.id;

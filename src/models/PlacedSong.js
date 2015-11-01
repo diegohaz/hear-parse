@@ -21,8 +21,7 @@ export default class PlacedSong extends Parse.Object {
   view() {
     let view = this.get('song').view();
 
-    view.songId   = view.id;
-    view.id       = this.id;
+    view.placedId = this.id;
     view.user     = this.get('user').view();
     view.url      = 'http://hear.ws/p/' + this.id;
     view.likes    = this.get('likes');
