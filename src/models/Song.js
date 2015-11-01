@@ -25,11 +25,11 @@ export default class Song extends Parse.Object {
     view.id         = this.id;
     view.title      = this.get('title');
     view.artist     = this.get('artist').view();
-    view.imageUrl   = this.get(service).imageUrl;
     view.previewUrl = this.get(service).previewUrl;
     view.service    = service;
     view.serviceId  = this.get(service).id;
     view.serviceUrl = this.get(service).url;
+    view.images     = this.get(service).images;
 
     return view;
   }
@@ -38,9 +38,9 @@ export default class Song extends Parse.Object {
   setService(serviceName, data) {
     this.set(serviceName, {
       id: '' + data.serviceId,
-      imageUrl: data.imageUrl,
       previewUrl: data.previewUrl,
-      url: data.serviceUrl
+      url: data.serviceUrl,
+      images: data.images
     });
   }
 

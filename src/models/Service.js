@@ -123,23 +123,31 @@ export default class Service {
         if (response) {
           result.title      = response.trackName;
           result.artist     = response.artistName;
-          result.imageUrl   = response.artworkUrl100;
           result.previewUrl = response.previewUrl;
           result.genre      = response.primaryGenreName;
           result.service    = this.name;
           result.serviceId  = '' + response.trackId;
           result.serviceUrl = response.trackViewUrl;
+          result.images     = {
+            small: response.artworkUrl100.replace('100x100', '96x96'),
+            medium: response.artworkUrl100.replace('100x100', '288x288'),
+            big: response.artworkUrl100.replace('100x100', '640x640')
+          };
         }
         break;
       case 'spotify':
         if (response) {
           result.title      = response.name;
           result.artist     = response.artists[0].name;
-          result.imageUrl   = response.album.images[1].url;
           result.previewUrl = response.preview_url;
           result.service    = this.name;
           result.serviceId  = response.id;
           result.serviceUrl = response.external_urls.spotify;
+          result.images     = {
+            small: response.album.images[2].url,
+            medium: response.album.images[1].url,
+            big: response.album.images[0].url
+          };
         }
         break;
       case 'deezer':
@@ -151,6 +159,11 @@ export default class Service {
           result.service    = this.name;
           result.serviceId  = response.id;
           result.serviceUrl = response.link;
+          result.images     = {
+            small: response.album.cover_medium.replace('250x250', '96x96'),
+            medium: response.album.cover_medium.replace('250x250', '288x288'),
+            big: response.album.cover_medium.replace('250x250', '640x640')
+          };
         }
         break;
     }
