@@ -1,6 +1,6 @@
 import Service from './Service';
 
-export default class User extends Parse.Object {
+export default class User extends Parse.User {
 	constructor() {
 		super('_User');
 	}
