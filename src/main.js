@@ -5,6 +5,7 @@ import Genre from './models/Genre';
 import Artist from './models/Artist';
 import Place from './models/Place';
 import Tests from './tests';
+import Jobs from './jobs';
 
 Parse.Cloud.beforeSave('_User', User.beforeSave);
 Parse.Cloud.beforeSave('Artist', Artist.beforeSave);

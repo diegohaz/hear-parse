@@ -14,7 +14,7 @@ export default class Place {
 
     view.name = this.name;
     view.radius = this.radius;
-    view.parent = this.parent? this.parent.view() : null;
+    view.parent = this.parent? this.parent.view() : undefined;
 
     return view;
   }
@@ -36,8 +36,7 @@ export default class Place {
       if (data.status == 'OK') {
         let results = data.results.reverse();
         let promises = [];
-        let place = null;
-        let parent = null;
+        let place, parent;
 
         for (let i = 0; i < types.length; i++) {
           let type = types[i];

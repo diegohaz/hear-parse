@@ -12,8 +12,8 @@ export default class User extends Parse.User {
 		this.get('service') 	       || this.set('service', {name: 'itunes'});
     this.get('removedSongs')     || this.set('removedSongs', []);
     this.get('removedArtists')   || this.set('removedArtists', []);
-    this.get('country')          || this.set('country', 'US');
-    this.get('locale')           || this.set('locale', 'en');
+    this.get('country')          || this.set('country', 'BR');
+    this.get('locale')           || this.set('locale', 'pt');
 	}
 
   // get service
@@ -35,12 +35,12 @@ export default class User extends Parse.User {
 
   // get country
   get country() {
-    return this.get('country')? this.get('country') : 'US';
+    return this.get('country')? this.get('country') : 'BR';
   }
 
   // get locale
   get locale() {
-    return this.get('locale')? this.get('locale') : 'en';
+    return this.get('locale')? this.get('locale') : 'pt';
   }
 
   // view
