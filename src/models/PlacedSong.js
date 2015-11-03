@@ -51,10 +51,16 @@ export default class PlacedSong extends Parse.Object {
 
     return Song.create(User.current.service, id).then(function(song) {
       let placedSong = new PlacedSong;
+      let removedSongs = User.current.get('removedSongs');
 
       placedSong.set('user', User.current);
       placedSong.set('song', song);
       placedSong.set('location', location);
+
+      if (~removedSongs.indexOf(song.id)) {
+        User.current.remove('removedSongs', song.id);
+        User.current.save();
+      }
 
       return placedSong.save().then(function(placedSong) {
         let view = placedSong.view();
@@ -62,7 +68,7 @@ export default class PlacedSong extends Parse.Object {
         view.distance = 0;
 
         return Parse.Promise.as(view);
-      });
+      })
     });
   }
 
