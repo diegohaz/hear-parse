@@ -73,7 +73,7 @@ export default class PlacedSong extends Parse.Object {
   }
 
   // list
-  static list(location, limit = 22, offset = 0, excludeIds = []) {
+  static list(location, limit = 31, offset = 0, excludeIds = []) {
     let removedSongs = User.current.removedSongs;
     let removedArtists = User.current.removedArtists;
     let serviceName = User.current.service.name;
