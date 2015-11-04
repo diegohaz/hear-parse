@@ -14,7 +14,10 @@ export default class PlacedSong extends Parse.Object {
     this.get('song')     || this.set('song', Song.createWithoutData('null'));
     this.get('location') || this.set('location', new Parse.GeoPoint());
 
-    this.setACL(new Parse.ACL({'*': {'read': true}}));
+    let acl = new Parse.ACL(this.get('user'));
+    acl.setPublicReadAccess(true)
+
+    this.setACL(acl);
   }
 
   // view
