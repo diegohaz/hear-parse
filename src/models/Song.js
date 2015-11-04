@@ -151,7 +151,7 @@ export default class Song extends Parse.Object {
   }
 
   // search
-  static search(service, string, limit = 10) {
+  static search(service, string, limit = 20) {
     return service.search(string, limit);
   }
 }
