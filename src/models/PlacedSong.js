@@ -55,6 +55,7 @@ export default class PlacedSong extends Parse.Object {
     return Song.create(User.current.service, id).then(function(song) {
       let placedSong = new PlacedSong;
       let removedSongs = User.current.get('removedSongs');
+      let removedArtists = User.current.get('removedArtists');
 
       placedSong.set('user', User.current);
       placedSong.set('song', song);
@@ -62,6 +63,11 @@ export default class PlacedSong extends Parse.Object {
 
       if (~removedSongs.indexOf(song.id)) {
         User.current.remove('removedSongs', song.id);
+        User.current.save();
+      }
+
+      if (~removedArtists.indexOf(song.artist.id)) {
+        User.current.remove('removedArtists', song.artist.id);
         User.current.save();
       }
 
