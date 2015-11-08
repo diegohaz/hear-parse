@@ -66,8 +66,8 @@ export default class PlacedSong extends Parse.Object {
         User.current.save();
       }
 
-      if (~removedArtists.indexOf(song.artist.id)) {
-        User.current.remove('removedArtists', song.artist.id);
+      if (~removedArtists.indexOf(song.get('artist').id)) {
+        User.current.remove('removedArtists', song.get('artist').id);
         User.current.save();
       }
 
