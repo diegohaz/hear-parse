@@ -84,7 +84,6 @@ export default class PlacedSong extends Parse.Object {
   // list
   static list(location, limit = 31, offset = 0, excludeIds = []) {
     let removedSongs = User.current.removedSongs;
-    let removedArtists = User.current.removedArtists;
     let serviceName = User.current.service.name;
     let songQuery = new Parse.Query(Song);
 
@@ -92,12 +91,6 @@ export default class PlacedSong extends Parse.Object {
 
     if (removedSongs.length) {
       songQuery.notContainedIn('objectId', User.current.removedSongs);
-    }
-
-    if (removedArtists.length) {
-      let artistQuery = new Parse.Query(Artist);
-      artistQuery.notContainedIn('objectId', removedArtists);
-      songQuery.matchesQuery('artist', artistQuery);
     }
 
     let placedSongs = new Parse.Query(PlacedSong);

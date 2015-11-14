@@ -7,13 +7,12 @@ export default class User extends Parse.User {
 
 	// schematize
 	schematize() {
-		this.get('name') 			       || this.set('name', '');
-		this.get('pictureUrl') 	     || this.set('pictureUrl', '');
-		this.get('service') 	       || this.set('service', {name: 'itunes'});
-    this.get('removedSongs')     || this.set('removedSongs', []);
-    this.get('removedArtists')   || this.set('removedArtists', []);
-    this.get('country')          || this.set('country', 'BR');
-    this.get('locale')           || this.set('locale', 'pt');
+		this.get('name') 			   || this.set('name', '');
+		this.get('pictureUrl') 	 || this.set('pictureUrl', '');
+		this.get('service') 	   || this.set('service', {name: 'itunes'});
+    this.get('removedSongs') || this.set('removedSongs', []);
+    this.get('country')      || this.set('country', 'BR');
+    this.get('locale')       || this.set('locale', 'pt');
 	}
 
   // get service
@@ -26,11 +25,6 @@ export default class User extends Parse.User {
   // get removedSongs
   get removedSongs() {
     return this.get('removedSongs')? this.get('removedSongs') : [];
-  }
-
-  // get removedArtists
-  get removedArtists() {
-    return this.get('removedArtists')? this.get('removedArtists') : [];
   }
 
   // get country
@@ -56,7 +50,7 @@ export default class User extends Parse.User {
 
   // get current
   static get current() {
-    let currentUser = Parse.User.current()? Parse.User.current() : User.createWithoutData('EBAL5Jka3s');
+    let currentUser = Parse.User.current()? Parse.User.current() : User.createWithoutData('null');
 
     return currentUser;
   }
