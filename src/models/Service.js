@@ -40,15 +40,18 @@ export default class Service {
   // lookup
   lookup(id) {
     let request = {};
+    let user = User.current();
+
+    if (!user) return Parse.Promise.error('Empty user');
 
     switch (this.name) {
       case 'itunes':
         request.url = 'https://itunes.apple.com/lookup';
-        request.params = {id: id, limit: 1, country: User.current.country};
+        request.params = {id: id, limit: 1, country: user.get('country')};
         break;
       case 'spotify':
         request.url = 'https://api.spotify.com/v1/tracks/' + id;
-        request.params = {market: User.current.country};
+        request.params = {market: user.get('country')};
         break;
       case 'deezer':
         request.url = 'http://api.deezer.com/track/' + id;
@@ -74,6 +77,9 @@ export default class Service {
   // search
   search(term, limit) {
     let request = {};
+    let user = User.current();
+
+    if (!user) return Parse.Promise.error('Empty user');
 
     switch (this.name) {
       case 'itunes':
@@ -82,7 +88,7 @@ export default class Service {
           term: term,
           limit: limit,
           media: 'music',
-          country: User.current.country
+          country: user.get('country')
         };
         break;
       case 'spotify':
@@ -91,7 +97,7 @@ export default class Service {
           q: term,
           limit: limit,
           type: 'track',
-          market: User.current.country
+          market: user.get('country')
         };
         break;
       case 'deezer':

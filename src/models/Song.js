@@ -20,7 +20,7 @@ export default class Song extends Parse.Object {
   // view
   view() {
     let view = {};
-    let service = User.current.service.name;
+    let service = User.current().get('service').name;
 
     view.songId     = this.id;
     view.title      = this.get('title');

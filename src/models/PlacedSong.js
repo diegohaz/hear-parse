@@ -1,6 +1,7 @@
 import Artist from './Artist';
 import Song from './Song';
 import User from './User';
+import Beacon from './Beacon';
 //import moment from 'moment/min/moment-with-locales.min';
 
 export default class PlacedSong extends Parse.Object {
@@ -12,6 +13,7 @@ export default class PlacedSong extends Parse.Object {
   schematize() {
     this.get('user')     || this.set('user', User.createWithoutData('null'));
     this.get('song')     || this.set('song', Song.createWithoutData('null'));
+    this.get('beacon')   || this.set('beacon', Beacon.createWithoutData('null'));
     this.get('location') || this.set('location', new Parse.GeoPoint());
 
     let acl = new Parse.ACL(this.get('user'));
@@ -49,48 +51,53 @@ export default class PlacedSong extends Parse.Object {
   }
 
   // Post
-  static place(id, location) {
+  static place(id, location, beaconUUID = null) {
     Parse.Cloud.useMasterKey();
 
-    return Song.create(User.current.service, id).then(function(song) {
-      let placedSong = new PlacedSong;
-      let removedSongs = User.current.get('removedSongs');
-      let removedArtists = User.current.get('removedArtists');
+    let user = User.current();
+    let placedSong = new PlacedSong;
 
-      placedSong.set('user', User.current);
+    if (!user) return Parse.Promise.error('Empty user');
+    if (!location) return Parse.Promise.error('Empty location');
+
+    placedSong.set('user', user);
+    placedSong.set('location', location);
+
+    return Song.create(user.service, id).then(function(song) {
       placedSong.set('song', song);
-      placedSong.set('location', location);
 
-      if (~removedSongs.indexOf(song.id)) {
-        User.current.remove('removedSongs', song.id);
-        User.current.save();
+      if (~user.get('removedSongs').indexOf(song.id)) {
+        user.remove('removedSongs', song.id);
+        user.save();
       }
 
-      if (~removedArtists.indexOf(song.get('artist').id)) {
-        User.current.remove('removedArtists', song.get('artist').id);
-        User.current.save();
-      }
+      return Beacon.create(beaconUUID);
+    }).then(function(beacon) {
+      placedSong.set('beacon', beacon);
 
-      return placedSong.save().then(function(placedSong) {
-        let view = placedSong.view();
+      return placedSong.save();
+    }).then(function(placedSong) {
+      let view = placedSong.view();
 
-        view.distance = 0;
+      view.distance = 0;
 
-        return Parse.Promise.as(view);
-      })
+      return Parse.Promise.as(view);
     });
   }
 
   // list
   static list(location, limit = 31, offset = 0, excludeIds = []) {
-    let removedSongs = User.current.removedSongs;
-    let serviceName = User.current.service.name;
+    let user = User.current();
+
+    if (!user) return Parse.Promise.error('Empty user');
+
+    let removedSongs = user.get('removedSongs');
     let songQuery = new Parse.Query(Song);
 
-    songQuery.exists(User.current.service.name);
+    songQuery.exists(user.service.name);
 
     if (removedSongs.length) {
-      songQuery.notContainedIn('objectId', User.current.removedSongs);
+      songQuery.notContainedIn('objectId', removedSongs);
     }
 
     let placedSongs = new Parse.Query(PlacedSong);

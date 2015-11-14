@@ -28,7 +28,7 @@ export default class Place {
       params: {
         latlng: `${location.latitude},${location.longitude}`,
         key: 'AIzaSyB1X4p0p_8WO8DsamK0n32AbCjndOWxDJQ',
-        language: User.current.locale
+        language: User.current().get('language')
       }
     }).then(function(httpResponse) {
       let data = httpResponse.data;

@@ -32,6 +32,7 @@ export default class Genre extends Parse.Object {
       return Parse.Promise.as();
     }
 
+    let country = User.current().get('country');
     let genres = new Parse.Query(Genre);
 
     genres.equalTo('name', name);
@@ -40,16 +41,16 @@ export default class Genre extends Parse.Object {
       if (genre) {
         let countries = genre.get('countries');
 
-        if (~countries.indexOf(User.current.country)) {
+        if (~countries.indexOf(country)) {
           return Parse.Promise.as(genre);
         } else {
-          genre.addUnique('countries', User.current.country);
+          genre.addUnique('countries', country);
           return genre.save();
         }
       } else {
         genre = new Genre;
         genre.set('name', name);
-        genre.set('countries', [User.current.country]);
+        genre.set('countries', [country]);
 
         return genre.save();
       }
