@@ -7,7 +7,8 @@ export default class Genre extends Parse.Object {
 
   // schematize
   schematize() {
-    this.get('name') || this.set('name', '');
+    this.get('name')      || this.set('name', '');
+    this.get('countries') || this.set('countries', []);
 
     this.setACL(new Parse.ACL({'*': {'read': true}}));
   }
@@ -34,15 +35,21 @@ export default class Genre extends Parse.Object {
     let genres = new Parse.Query(Genre);
 
     genres.equalTo('name', name);
-    genres.equalTo('country', User.current.country);
 
     return genres.first().then(function(genre) {
       if (genre) {
-        return Parse.Promise.as(genre);
+        let countries = genre.get('countries');
+
+        if (~countries.indexOf(User.current.country)) {
+          return Parse.Promise.as(genre);
+        } else {
+          genre.addUnique('countries', User.current.country);
+          return genre.save();
+        }
       } else {
         genre = new Genre;
         genre.set('name', name);
-        genre.set('country', User.current.country);
+        genre.set('countries', [User.current.country]);
 
         return genre.save();
       }
