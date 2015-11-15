@@ -20,6 +20,7 @@ export default class User extends Parse.User {
     this.get('removedSongs') || this.set('removedSongs', []);
     this.get('country')      || this.set('country', 'BR');
     this.get('language')     || this.set('language', 'pt');
+    this.get('location')     || this.set('location', new Parse.GeoPoint());
 	}
 
   // view

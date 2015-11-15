@@ -46,7 +46,7 @@ Parse.Cloud.define('placeSong', function(request, response) {
   let serviceId = request.params.serviceId;
   let latitude = +request.params.latitude;
   let longitude = +request.params.longitude;
-  let beaconUUID = request.params.beaconUUID;
+  let beaconUUID = request.params.beaconUUID || undefined;
 
   let location = new Parse.GeoPoint(latitude, longitude);
 
