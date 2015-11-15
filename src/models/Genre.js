@@ -26,8 +26,6 @@ export default class Genre extends Parse.Object {
 
   // create
   static create(name) {
-    Parse.Cloud.useMasterKey();
-
     if (!name) {
       return Parse.Promise.as();
     }
@@ -45,7 +43,7 @@ export default class Genre extends Parse.Object {
           return Parse.Promise.as(genre);
         } else {
           genre.addUnique('countries', country);
-          return genre.save();
+          return genre.save(null, {useMasterKey: true});
         }
       } else {
         genre = new Genre;

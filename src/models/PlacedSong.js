@@ -51,8 +51,6 @@ export default class PlacedSong extends Parse.Object {
 
   // Post
   static place(id, location, beaconUUID = null) {
-    Parse.Cloud.useMasterKey();
-
     let user = User.current();
     let placedSong = new PlacedSong;
 

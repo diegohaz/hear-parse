@@ -7,6 +7,8 @@ export default class Beacon extends Parse.Object {
   schematize() {
     this.get('uuid') || this.set('uuid', '');
     this.get('name') || this.set('name', '');
+
+    this.setACL(new Parse.ACL(User.current()));
   }
 
   // beforeSave
@@ -21,9 +23,7 @@ export default class Beacon extends Parse.Object {
   }
 
   // create
-  static create(uuid) {
-    Parse.Cloud.useMasterKey();
-
+  static get(uuid) {
     if (!uuid) {
       return Parse.Promise.as();
     }
@@ -32,16 +32,7 @@ export default class Beacon extends Parse.Object {
 
     beacons.equalTo('uuid', uuid);
 
-    return beacons.first().then(function(beacon) {
-      if (beacon) {
-        return Parse.Promise.as(beacon);
-      } else {
-        beacon = new Beacon;
-        beacon.set('uuid', uuid);
-
-        return beacon.save();
-      }
-    });
+    return beacons.first();
   }
 }
 

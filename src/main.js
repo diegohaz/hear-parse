@@ -14,7 +14,7 @@ Parse.Cloud.beforeSave('Genre', Genre.beforeSave);
 Parse.Cloud.beforeSave('PlacedSong', PlacedSong.beforeSave);
 Parse.Cloud.beforeSave('Song', Song.beforeSave);
 Parse.Cloud.afterSave('Song', Song.afterSave);
-Parse.Cloud.afterSave('SongRate', SongRate.beforeSave);
+Parse.Cloud.beforeSave('SongRate', SongRate.beforeSave);
 
 Parse.Cloud.define('fetchPlace', function(request, response) {
   let latitude = +request.params.latitude;
@@ -29,7 +29,7 @@ Parse.Cloud.define('searchSong', function(request, response) {
   let string = request.params.string;
   let limit = request.params.limit || undefined;
 
-  Song.search(User.current.service, string, limit).then(response.success, response.error);
+  Song.search(User.current().service, string, limit).then(response.success, response.error);
 });
 
 Parse.Cloud.define('listPlacedSongs', function(request, response) {

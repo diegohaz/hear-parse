@@ -2,6 +2,7 @@ import Artist from './Artist';
 import Genre from './Genre';
 import User from './User';
 import Service from './Service';
+import SongRate from './SongRate';
 
 export default class Song extends Parse.Object {
   constructor() {
@@ -32,6 +33,11 @@ export default class Song extends Parse.Object {
     view.images     = this.get(service).images;
 
     return view;
+  }
+
+  // view
+  taste(location = undefined, radius = undefined) {
+    return SongRate.taste(this, location, radius);
   }
 
   // setService
@@ -77,8 +83,6 @@ export default class Song extends Parse.Object {
 
   // beforeSave
   static beforeSave(request, response) {
-    Parse.Cloud.useMasterKey();
-
     let song = request.object;
 
     song.schematize();
@@ -130,8 +134,6 @@ export default class Song extends Parse.Object {
 
   // create
   static create(service, id) {
-    Parse.Cloud.useMasterKey();
-
     let songs = new Parse.Query(Song);
 
     songs.include(['genre', 'artist']);
@@ -144,7 +146,7 @@ export default class Song extends Parse.Object {
       } else {
         song = new Song;
         return song.fetchFromService(service, id).then(function() {
-          return song.save();
+          return song.save(null);
         });
       }
     });

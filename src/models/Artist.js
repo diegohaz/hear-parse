@@ -33,8 +33,6 @@ export default class Artist extends Parse.Object {
 
   // create
   static create(name) {
-    Parse.Cloud.useMasterKey();
-
     if (!name) {
       return Parse.Promise.as();
     }
@@ -50,7 +48,7 @@ export default class Artist extends Parse.Object {
         artist = new Artist;
         artist.set('name', name);
 
-        return artist.save();
+        return artist.save(null, {useMasterKey: true});
       }
     });
   }
