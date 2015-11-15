@@ -13,7 +13,6 @@ export default class PlacedSong extends Parse.Object {
   schematize() {
     this.get('user')     || this.set('user', User.createWithoutData('null'));
     this.get('song')     || this.set('song', Song.createWithoutData('null'));
-    this.get('beacon')   || this.set('beacon', Beacon.createWithoutData('null'));
     this.get('location') || this.set('location', new Parse.GeoPoint());
 
     let acl = new Parse.ACL(this.get('user'));
@@ -86,7 +85,7 @@ export default class PlacedSong extends Parse.Object {
   }
 
   // list
-  static list(location, limit = 31, offset = 0, excludeIds = []) {
+  static list(location, limit = 31, offset = 0, excludeIds = [], beaconUUID = null) {
     let user = User.current();
 
     if (!user) return Parse.Promise.error('Empty user');

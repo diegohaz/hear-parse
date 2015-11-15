@@ -40,6 +40,8 @@ export default class SongRate extends Parse.Object {
 
   // process
   static process(playbacks) {
+    Parse.Cloud.useMasterKey();
+
     let user = User.current();
 
     if (!user) return Parse.Promise.error('Empty user');
@@ -50,9 +52,8 @@ export default class SongRate extends Parse.Object {
 
     songQuery.containedIn('objectId', songIds);
 
-    rateQuery.include(['song', 'song.artist', 'song.genre']);
-    rateQuery.equalTo('user', user);
     rateQuery.matchesQuery(songQuery);
+    rateQuery.equalTo('user', user);
 
     return rateQuery.find().then(function(rates) {
       let foundIds = _.map(rates, rate => rate.get('song').id);
@@ -65,6 +66,8 @@ export default class SongRate extends Parse.Object {
           rate = _.find(rates, rate => rate.get('song').id == id);
         } else {
           rate = new SongRate;
+          rate.set('user', user);
+          rate.set('song', Song.createWithoutData(id));
 
           foundIds.push(id);
           rates.push(rate);
