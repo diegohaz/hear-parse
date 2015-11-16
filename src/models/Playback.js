@@ -13,6 +13,7 @@ export default class Playback extends Parse.Object {
     this.get('user')     || this.set('user', User.current());
     this.get('location') || this.set('location', new Parse.GeoPoint());
     this.get('rate')     || this.set('rate', 0);
+    this.get('placed')   || this.set('placed', false);
 
     this.setACL(new Parse.ACL({'*': {'read': true}}));
   }
