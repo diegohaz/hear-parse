@@ -8,17 +8,19 @@ export default class Beacon extends Parse.Object {
     this.get('uuid') || this.set('uuid', '');
     this.get('name') || this.set('name', '');
 
-    this.setACL(new Parse.ACL(User.current()));
+    let acl = new Parse.ACL(User.current());
+    acl.setPublicReadAccess(true)
+
+    this.setACL(acl);
   }
 
   // beforeSave
   static beforeSave(request, response) {
     let beacon = request.object;
 
-    beacon.schematize();
-
     if (!beacon.get('uuid')) return response.error('Empty uuid');
 
+    beacon.schematize();
     response.success();
   }
 

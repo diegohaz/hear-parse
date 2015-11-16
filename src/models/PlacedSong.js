@@ -1,5 +1,6 @@
 import Artist from './Artist';
 import Song from './Song';
+import Playback from './Playback';
 import User from './User';
 import Beacon from './Beacon';
 //import moment from 'moment/min/moment-with-locales.min';
@@ -16,7 +17,7 @@ export default class PlacedSong extends Parse.Object {
     this.get('location') || this.set('location', new Parse.GeoPoint());
 
     let acl = new Parse.ACL(this.get('user'));
-    acl.setPublicReadAccess(true)
+    acl.setPublicReadAccess(true);
 
     this.setACL(acl);
   }
@@ -63,12 +64,9 @@ export default class PlacedSong extends Parse.Object {
     return Song.create(user.service, id).then(function(song) {
       placedSong.set('song', song);
 
-      if (~user.get('removedSongs').indexOf(song.id)) {
-        user.remove('removedSongs', song.id);
-        user.save();
-      }
-
-      return Beacon.create(beaconUUID);
+      return Playback.place(song.id);
+    }).then(function() {
+      return Beacon.get(beaconUUID);
     }).then(function(beacon) {
       placedSong.set('beacon', beacon);
 
@@ -83,30 +81,33 @@ export default class PlacedSong extends Parse.Object {
   }
 
   // list
-  static list(location, limit = 31, offset = 0, excludeIds = [], beaconUUID = null) {
+  static list(location, limit = 31, offset = 0, excludeIds = []) {
     let user = User.current();
 
     if (!user) return Parse.Promise.error('Empty user');
 
     let removedSongs = user.get('removedSongs');
     let songQuery = new Parse.Query(Song);
-
-    songQuery.exists(user.service.name);
+    let placedSongs = new Parse.Query(PlacedSong);
+    let taste;
 
     if (removedSongs.length) {
       songQuery.notContainedIn('objectId', removedSongs);
     }
 
-    let placedSongs = new Parse.Query(PlacedSong);
-
+    songQuery.exists(user.service.name);
+    placedSongs.matchesQuery('song', songQuery);
     placedSongs.include(['song', 'song.genre', 'song.artist']);
     placedSongs.near('location', location);
-    placedSongs.matchesQuery('song', songQuery);
     placedSongs.withinKilometers('location', location, 20000);
     placedSongs.limit(limit * 10);
     placedSongs.skip(offset);
 
-    return placedSongs.find().then(function(placedSongs) {
+    return user.taste().then(function(result) {
+      taste = result;
+
+      return placedSongs.find();
+    }).then(function(placedSongs) {
       let songsIds = excludeIds;
       let views = [];
       let results = {};
@@ -117,12 +118,17 @@ export default class PlacedSong extends Parse.Object {
         offset++;
 
         if (!~songsIds.indexOf(song.id)) {
+          let rate = taste.rate(song);
+          songsIds.push(song.id);
+
+          if (rate <= 0.5 && Math.random() > rate) continue;
+
           let view = placedSong.view();
 
           view.distance = placedSong.get('location').kilometersTo(location)*1000;
           view.distance = Math.round(view.distance);
+          view.rate = rate;
 
-          songsIds.push(song.id);
           views.push(view);
         }
       }

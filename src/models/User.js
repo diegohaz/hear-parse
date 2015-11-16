@@ -1,5 +1,5 @@
 import Service from './Service';
-import SongRate from './SongRate';
+import Playback from './Playback';
 
 export default class User extends Parse.User {
 	constructor() {
@@ -18,6 +18,7 @@ export default class User extends Parse.User {
 		this.get('name') 			   || this.set('name', '');
 		this.get('pictureUrl') 	 || this.set('pictureUrl', '');
 		this.get('service') 	   || this.set('service', {name: 'itunes'});
+    this.get('removedSongs') || this.set('removedSongs', []);
     this.get('country')      || this.set('country', 'BR');
     this.get('language')     || this.set('language', 'pt');
     this.get('location')     || this.set('location', new Parse.GeoPoint());
@@ -36,7 +37,7 @@ export default class User extends Parse.User {
 
   // taste
   taste() {
-    return SongRate.taste(this);
+    return Playback.taste(this);
   }
 
 	// beforeSave

@@ -1,82 +1,46 @@
 import User from './User';
 import Artist from './Artist';
-import SongRate from './SongRate';
+import PlacedSong from './PlacedSong';
 import _ from 'underscore';
 
 export default class Taste {
-  constructor(rates) {
-    this.rates = rates;
+  constructor(playbacks, user = null) {
+    this.user = user;
+    this.songs = _.groupBy(playbacks, p => p.get('song').id);
+    this.artists = _.groupBy(playbacks, p => p.get('song').get('artist').id);
+    this.genres = _.groupBy(playbacks, p => p.get('song').get('genre').id);
+
+    this.removedSongs = user? user.get('removedSongs') : [];
   }
 
   // rate
   rate(song) {
-    let rate = _.find(this.rates, rate => rate.get('song').id == song.id);
+    if (~this.removedSongs.indexOf(song.id)) return 0;
 
-    if (!rate) {
-      let artistRate = this.rateArtist(song.get('artist'));
-      let genreRate = this.rateGenre(song.get('genre'));
+    if (~_.keys(this.songs).indexOf(song.id)) {
+      let playbacks = this.songs[song.id];
 
-      return artistRate > 0? (artistRate + genreRate) / 2 : 0;
+      if (playbacks.length < 3) return 1;
+
+      return _.reduce(playbacks, (memo, p) => memo + p.get('rate'), 0) / playbacks.length;
     } else {
-      return rate.get('rate');
+      let artistId = song.get('artist').id;
+      let genreId = song.get('genre').id;
+      let hasArtist = ~_.keys(this.artists).indexOf(artistId);
+      let hasGenre = ~_.keys(this.genres).indexOf(genreId);
+
+      if (!hasArtist && !hasGenre) return 1;
+
+      let id = hasArtist? artistId : genreId;
+      let key = hasArtist? 'artists' : 'genres';
+      let threshold = hasArtist? 3 : 10;
+      let playbacks = this[key][id];
+      let songs = _.map(_.groupBy(playbacks, p => p.get('song').id), g => g[0]);
+
+      if (songs.length < threshold) return 1;
+
+      return _.reduce(songs, (memo, s) => memo + this.rate(s), 0) / songs.length;
     }
-  }
-
-  // artist
-  rateArtist(artist) {
-    let rates = _.filter(this.rates, rate => rate.get('song').get('artist').id == artist.id);
-
-    if (!rates.length) return 1;
-
-    let rate = _.reduce(rates, (memo, rate) => memo + rate.get('rate'), 0) / rates.length;
-
-    return rate > 0? rate : Math.max(0, 0.3 - rates.length/10);
-  }
-
-  // genre
-  rateGenre(genre) {
-    let rates = _.filter(this.rates, rate => rate.get('song').get('genre').id == genre.id);
-
-    if (!rates.length) return 1;
-
-    let rate = _.reduce(rates, (memo, rate) => memo + rate.get('rate'), 0) / rates.length;
-
-    return rate > 0? rate : Math.max(-0.5, 1 - rates.length/10);
-  }
-
-  // topSongs
-  topSongs(limit = 10, excludePlacedSongs = false) {
-    let rates = _.sortBy(this.rates, rate => rate.get('rate')).reverse();
-
-    if (excludePlacedSongs) {
-      rates = _.filter(rates, rate => rate.get('rate') <= 1);
-    }
-
-    rates = rates.slice(0, limit);
-
-    return _.map(rates, rate => rate.get('song'));
-  }
-
-  // topArtists
-  topArtists(limit) {
-    let artists = _.groupBy(this.rates, rate => rate.get('song').get('artist').id);
-
-    artists = _.sortBy(artists, rates => {
-      return _.reduce(rates, (memo, rate) => memo + rate.get('rate'), 0) / rates.length;
-    });
-
-    return _.map(artists, rates => rates[0].get('artist')).slice(0, limit);
-  }
-
-  // topGenres
-  topGenres(limit) {
-    let genres = _.groupBy(this.rates, rate => rate.get('song').get('genre').id);
-
-    genres = _.sortBy(genres, rates => {
-      return _.reduce(rates, (memo, rate) => memo + rate.get('rate'), 0) / rates.length;
-    });
-
-    return _.map(genres, rates => rates[0].get('genre')).slice(0, limit);
   }
 
 

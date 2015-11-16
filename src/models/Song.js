@@ -2,7 +2,7 @@ import Artist from './Artist';
 import Genre from './Genre';
 import User from './User';
 import Service from './Service';
-import SongRate from './SongRate';
+import Playback from './Playback';
 
 export default class Song extends Parse.Object {
   constructor() {
@@ -12,8 +12,8 @@ export default class Song extends Parse.Object {
   // schematize
   schematize() {
     this.get('title')  || this.set('title', '');
-    this.get('artist') || this.set('artist', new Artist);
-    this.get('genre')  || this.set('genre', new Genre);
+    this.get('artist') || this.set('artist', Artist.createWithoutData('null'));
+    this.get('genre')  || this.set('genre', Genre.createWithoutData('null'));
 
     this.setACL(new Parse.ACL({'*': {'read': true}}));
   }
@@ -35,9 +35,9 @@ export default class Song extends Parse.Object {
     return view;
   }
 
-  // view
-  taste(location = undefined, radius = undefined) {
-    return SongRate.taste(this, location, radius);
+  // taste
+  taste(user = undefined, location = undefined) {
+    return Playback.taste(user, this, location);
   }
 
   // setService
