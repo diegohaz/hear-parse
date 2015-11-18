@@ -57,14 +57,15 @@ export default class PlacedSong extends Parse.Object {
     if (!user) return Parse.Promise.error('Empty user');
     if (!location) return Parse.Promise.error('Empty location');
 
-    user.set('location', location);
-    user.save();
-
     placedSong.set('user', user);
     placedSong.set('location', location);
 
     return Song.create(user.service, id).then(function(song) {
       placedSong.set('song', song);
+
+      user.remove('removedSongs', song.id);
+      user.set('location', location);
+      user.save();
 
       return Beacon.get(beaconUUID);
     }).then(function(beacon) {
