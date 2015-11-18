@@ -1,9 +1,9 @@
 import User from './User';
+import Beacon from './Beacon';
 
 export default class Place {
-  constructor(name, location, radius, parent) {
+  constructor(name, radius, parent) {
     this.name = name;
-    this.location = location;
     this.radius = radius;
     this.parent = parent;
   }
@@ -20,7 +20,7 @@ export default class Place {
   }
 
   // fetch
-  static fetch(location) {
+  static fetch(location, beaconUUID = null) {
     let types = ['country', 'administrative_area_level_1', 'locality', 'sublocality'];
     let user = User.current();
 
@@ -57,15 +57,29 @@ export default class Place {
               let pointSW = new Parse.GeoPoint(locationSW.lat, locationSW.lng);
               let radius = pointNE.kilometersTo(pointSW)*1000/2;
 
-              place = new Place(name, point, radius, parent);
+              place = new Place(name, radius, parent);
               parent = place;
             }
           }
         }
 
-        return Parse.Promise.as(place.view());
+        return Parse.Promise.as(place);
       } else {
         return Parse.Promise.error(data.status);
+      }
+    }).then(function(place) {
+      if (beaconUUID) {
+        return Beacon.get(beaconUUID).then(function(beacon) {
+          if (beacon) {
+            place = new Place(beacon.get('name'), 20, place);
+
+            return Parse.Promise.as(place.view());
+          } else {
+            return Parse.Promise.as(place.view());
+          }
+        });
+      } else {
+        return Parse.Promise.as(place.view());
       }
     });
   }

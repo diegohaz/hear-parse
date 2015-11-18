@@ -19,10 +19,11 @@ Parse.Cloud.afterSave('Song', Song.afterSave);
 Parse.Cloud.define('fetchPlace', function(request, response) {
   let latitude = +request.params.latitude;
   let longitude = +request.params.longitude;
+  let beaconUUID = request.params.beaconUUID || undefined;
 
   let location = new Parse.GeoPoint(latitude, longitude);
 
-  Place.fetch(location).then(response.success, response.error);
+  Place.fetch(location, beaconUUID).then(response.success, response.error);
 });
 
 Parse.Cloud.define('searchSong', function(request, response) {
