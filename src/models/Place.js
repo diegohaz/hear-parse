@@ -22,13 +22,14 @@ export default class Place {
   // fetch
   static fetch(location) {
     let types = ['country', 'administrative_area_level_1', 'locality', 'sublocality'];
+    let user = User.current();
 
     return Parse.Cloud.httpRequest({
       url: 'https://maps.googleapis.com/maps/api/geocode/json',
       params: {
         latlng: `${location.latitude},${location.longitude}`,
         key: 'AIzaSyB1X4p0p_8WO8DsamK0n32AbCjndOWxDJQ',
-        language: User.current().get('language')
+        language: user.get('language')
       }
     }).then(function(httpResponse) {
       let data = httpResponse.data;

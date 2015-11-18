@@ -41,12 +41,11 @@ export default class PlacedSong extends Parse.Object {
   static beforeSave(request, response) {
     let placedSong = request.object;
 
-    placedSong.schematize();
-
     if (!placedSong.get('user')) return response.error('Empty user');
     if (!placedSong.get('song')) return response.error('Empty song');
     if (!placedSong.get('location')) return response.error('Empty location');
 
+    placedSong.schematize();
     response.success();
   }
 
@@ -58,14 +57,15 @@ export default class PlacedSong extends Parse.Object {
     if (!user) return Parse.Promise.error('Empty user');
     if (!location) return Parse.Promise.error('Empty location');
 
+    user.set('location', location);
+    user.save();
+
     placedSong.set('user', user);
     placedSong.set('location', location);
 
     return Song.create(user.service, id).then(function(song) {
       placedSong.set('song', song);
 
-      return Playback.place(song.id);
-    }).then(function() {
       return Beacon.get(beaconUUID);
     }).then(function(beacon) {
       placedSong.set('beacon', beacon);
@@ -85,6 +85,9 @@ export default class PlacedSong extends Parse.Object {
     let user = User.current();
 
     if (!user) return Parse.Promise.error('Empty user');
+
+    user.set('location', location);
+    user.save();
 
     let removedSongs = user.get('removedSongs');
     let songQuery = new Parse.Query(Song);
@@ -110,7 +113,7 @@ export default class PlacedSong extends Parse.Object {
     }).then(function(placedSongs) {
       let songsIds = excludeIds;
       let views = [];
-      let results = {};
+      let output = {};
 
       for (let i = 0; i < placedSongs.length && views.length < limit; i++) {
         let placedSong = placedSongs[i];
@@ -133,10 +136,10 @@ export default class PlacedSong extends Parse.Object {
         }
       }
 
-      results.offset = offset;
-      results.songs = views;
+      output.offset = offset;
+      output.songs = views;
 
-      return Parse.Promise.as(results);
+      return Parse.Promise.as(output);
     });
   }
 

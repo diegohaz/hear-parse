@@ -14,6 +14,8 @@ export default class Playback extends Parse.Object {
     this.get('location') || this.set('location', new Parse.GeoPoint());
     this.get('rate')     || this.set('rate', 0);
     this.get('placed')   || this.set('placed', false);
+    this.get('saved')    || this.set('saved', false);
+    this.get('chosen')   || this.set('chosen', false);
 
     this.setACL(new Parse.ACL({'*': {'read': true}}));
   }
@@ -28,6 +30,10 @@ export default class Playback extends Parse.Object {
     playback.schematize();
 
     if (!playback.get('user')) return response.error('Empty user');
+
+    if (playback.get('placed') || playback.get('saved')) {
+      playback.set('rate', 1);
+    }
 
     response.success();
   }

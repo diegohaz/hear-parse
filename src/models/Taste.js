@@ -17,17 +17,28 @@ export default class Taste {
   rate(song) {
     if (~this.removedSongs.indexOf(song.id)) return 0;
 
-    if (~_.keys(this.songs).indexOf(song.id)) {
+    if (this.songs[song.id]) {
       let playbacks = this.songs[song.id];
+      let songRate = _.reduce(playbacks, (memo, playback) => {
+        let playbackRate = playback.get('rate');
 
-      if (playbacks.length < 3) return 1;
+        playbackRate += playback.get('placed') * 5;
+        playbackRate += playback.get('saved') * 1;
+        playbackRate += playback.get('chosen') * 0.3;
 
-      return _.reduce(playbacks, (memo, p) => memo + p.get('rate'), 0) / playbacks.length;
+        return memo + playbackRate;
+      }, 0) / playbacks.length;
+
+      if (playbacks.length == 1 && songRate < 0.5) {
+        songRate = 0.5;
+      }
+
+      return songRate;
     } else {
       let artistId = song.get('artist').id;
       let genreId = song.get('genre').id;
-      let hasArtist = ~_.keys(this.artists).indexOf(artistId);
-      let hasGenre = ~_.keys(this.genres).indexOf(genreId);
+      let hasArtist = !!this.artists[artistId];
+      let hasGenre = !!this.genres[genreId];
 
       if (!hasArtist && !hasGenre) return 1;
 
@@ -35,7 +46,7 @@ export default class Taste {
       let key = hasArtist? 'artists' : 'genres';
       let threshold = hasArtist? 3 : 10;
       let playbacks = this[key][id];
-      let songs = _.map(_.groupBy(playbacks, p => p.get('song').id), g => g[0]);
+      let songs = _.map(_.groupBy(playbacks, p => p.get('song').id), g => g[0].get('song'));
 
       if (songs.length < threshold) return 1;
 
