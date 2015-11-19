@@ -45,6 +45,14 @@ Parse.Cloud.define('listPlacedSongs', function(request, response) {
   PlacedSong.list(location, limit, offset, excludeIds).then(response.success, response.error);
 });
 
+Parse.Cloud.define('listPlacedSongsByBeacon', function(request, response) {
+  let beaconUUID = request.params.beaconUUID;
+  let limit = request.params.limit || undefined;
+  let offset = request.params.offset || undefined;
+
+  PlacedSong.listByBeacon(beaconUUID, limit, offset).then(response.success, response.error);
+});
+
 Parse.Cloud.define('placeSong', function(request, response) {
   let serviceId = request.params.serviceId;
   let latitude = +request.params.latitude;

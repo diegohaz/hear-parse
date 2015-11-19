@@ -3,6 +3,7 @@ import Song from './Song';
 import Playback from './Playback';
 import User from './User';
 import Beacon from './Beacon';
+import _ from 'underscore';
 //import moment from 'moment/min/moment-with-locales.min';
 
 export default class PlacedSong extends Parse.Object {
@@ -144,6 +145,43 @@ export default class PlacedSong extends Parse.Object {
     });
   }
 
+  // listByBeacon
+  static listByBeacon(beaconUUID, limit = 31, offset = 0) {
+    let user = User.current();
+
+    if (!user) return Parse.Promise.error('Empty user');
+
+    let songQuery = new Parse.Query(Song);
+    let beaconQuery = new Parse.Query(Beacon);
+    let placedSongs = new Parse.Query(PlacedSong);
+
+    songQuery.exists(user.service.name);
+    beaconQuery.equalTo('uuid', beaconUUID);
+    placedSongs.matchesQuery('song', songQuery);
+    placedSongs.matchesQuery('beacon', beaconQuery);
+    placedSongs.include(['song', 'song.genre', 'song.artist']);
+    placedSongs.limit(limit * 10);
+    placedSongs.skip(offset);
+    placedSongs.descending('createdAt');
+
+    return placedSongs.find().then(function(placedSongs) {
+      let views = [];
+      let output = {};
+
+      placedSongs = _.groupBy(placedSongs, p => p.get('song').id).slice(0, limit);
+      offset += _.reduce(placedSongs, (memo, p) => memo + p.length, 0);
+
+      for (let i = 0; i < placedSongs.length && views.length < limit; i++) {
+        let placedSong = placedSongs[i][0];
+        views.push(placedSong.view());
+      }
+
+      output.offset = offset;
+      output.views = views;
+
+      return Parse.Promise.as(views);
+    });
+  }
 }
 
 Parse.Object.registerSubclass('PlacedSong', PlacedSong);
