@@ -1,3 +1,5 @@
+import User from './User';
+
 export default class Beacon extends Parse.Object {
   constructor() {
     super('Beacon');
@@ -5,6 +7,7 @@ export default class Beacon extends Parse.Object {
 
   // schematize
   schematize() {
+    this.get('user') || this.set('user', User.current());
     this.get('uuid') || this.set('uuid', '');
     this.get('name') || this.set('name', '');
 
