@@ -165,19 +165,23 @@ export default class PlacedSong extends Parse.Object {
     placedSongs.descending('createdAt');
 
     return placedSongs.find().then(function(placedSongs) {
+      let songsIds = [];
       let views = [];
       let output = {};
 
-      placedSongs = _.groupBy(placedSongs, p => p.get('song').id).slice(0, limit);
-      offset += _.reduce(placedSongs, (memo, p) => memo + p.length, 0);
-
       for (let i = 0; i < placedSongs.length && views.length < limit; i++) {
-        let placedSong = placedSongs[i][0];
-        views.push(placedSong.view());
+        let placedSong = placedSongs[i];
+        let song = placedSong.get('song');
+        offset++;
+
+        if (!~songsIds.indexOf(song.id)) {
+          songsIds.push(song.id);
+          views.push(placedSong.view());
+        }
       }
 
       output.offset = offset;
-      output.views = views;
+      output.songs = views;
 
       return Parse.Promise.as(views);
     });
