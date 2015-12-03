@@ -1,5 +1,4 @@
 import User from './User';
-import Beacon from './Beacon';
 
 export default class Place {
   constructor(name, radius, parent) {
@@ -20,7 +19,7 @@ export default class Place {
   }
 
   // fetch
-  static fetch(location, beaconUUID = null) {
+  static fetch(location) {
     let types = ['country', 'administrative_area_level_1', 'locality', 'sublocality'];
     let user = User.current();
 
@@ -63,23 +62,9 @@ export default class Place {
           }
         }
 
-        return Parse.Promise.as(place);
+        return Parse.Promise.as(place.view());
       } else {
         return Parse.Promise.error(data.status);
-      }
-    }).then(function(place) {
-      if (beaconUUID) {
-        return Beacon.get(beaconUUID).then(function(beacon) {
-          if (beacon) {
-            place = new Place(beacon.get('name'), 20, place);
-
-            return Parse.Promise.as(place.view());
-          } else {
-            return Parse.Promise.as(place.view());
-          }
-        });
-      } else {
-        return Parse.Promise.as(place.view());
       }
     });
   }

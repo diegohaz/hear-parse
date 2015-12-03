@@ -2,7 +2,6 @@ import Artist from './Artist';
 import Song from './Song';
 import Playback from './Playback';
 import User from './User';
-import Beacon from './Beacon';
 import _ from 'underscore';
 //import moment from 'moment/min/moment-with-locales.min';
 
@@ -67,10 +66,6 @@ export default class PlacedSong extends Parse.Object {
       user.remove('removedSongs', song.id);
       user.set('location', location);
       user.save();
-
-      return Beacon.get(beaconUUID);
-    }).then(function(beacon) {
-      placedSong.set('beacon', beacon);
 
       return placedSong.save();
     }).then(function(placedSong) {
@@ -142,48 +137,6 @@ export default class PlacedSong extends Parse.Object {
       output.songs = views;
 
       return Parse.Promise.as(output);
-    });
-  }
-
-  // listByBeacon
-  static listByBeacon(beaconUUID, limit = 31, offset = 0) {
-    let user = User.current();
-
-    if (!user) return Parse.Promise.error('Empty user');
-
-    let songQuery = new Parse.Query(Song);
-    let beaconQuery = new Parse.Query(Beacon);
-    let placedSongs = new Parse.Query(PlacedSong);
-
-    songQuery.exists(user.service.name);
-    beaconQuery.equalTo('uuid', beaconUUID);
-    placedSongs.matchesQuery('song', songQuery);
-    placedSongs.matchesQuery('beacon', beaconQuery);
-    placedSongs.include(['song', 'song.genre', 'song.artist']);
-    placedSongs.limit(limit * 10);
-    placedSongs.skip(offset);
-    placedSongs.descending('createdAt');
-
-    return placedSongs.find().then(function(placedSongs) {
-      let songsIds = [];
-      let views = [];
-      let output = {};
-
-      for (let i = 0; i < placedSongs.length && views.length < limit; i++) {
-        let placedSong = placedSongs[i];
-        let song = placedSong.get('song');
-        offset++;
-
-        if (!~songsIds.indexOf(song.id)) {
-          songsIds.push(song.id);
-          views.push(placedSong.view());
-        }
-      }
-
-      output.offset = offset;
-      output.songs = views;
-
-      return Parse.Promise.as(views);
     });
   }
 }
