@@ -20,7 +20,7 @@ Parse.Cloud.define('fetchPlace', function(request, response) {
 
   let location = new Parse.GeoPoint(latitude, longitude);
 
-  Place.fetch(location, beaconUUID).then(response.success, response.error);
+  Place.fetch(location).then(response.success, response.error);
 });
 
 Parse.Cloud.define('searchSong', function(request, response) {
@@ -49,7 +49,7 @@ Parse.Cloud.define('placeSong', function(request, response) {
 
   let location = new Parse.GeoPoint(latitude, longitude);
 
-  PlacedSong.place(serviceId, location, beaconUUID).then(response.success, response.error);
+  PlacedSong.place(serviceId, location).then(response.success, response.error);
 });
 
 Parse.Cloud.define('listened', function(request, response) {
