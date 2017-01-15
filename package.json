@@ -21,8 +21,8 @@
   },
   "homepage": "https://github.com/diegohaz/hear-parse",
   "devDependencies": {
-    "babelify": "^6.3.0",
-    "browserify": "^11.0.1"
+    "babelify": "^7.3.0",
+    "browserify": "^13.3.0"
   },
   "dependencies": {
     "moment": "^2.10.6",
